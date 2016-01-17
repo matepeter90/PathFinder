@@ -113,11 +113,14 @@ namespace Pathfinder
             {
                 for (int x = 0; x < visibleSquareWidth; x++)
                 {
-                    spriteBatch.Draw(
+                    foreach (int tileID in tileMap.Rows[y + firstY].Columns[x + firstX].BaseTiles)
+                    {
+                        spriteBatch.Draw(
                         tile.TileSetTexture,
                         new Rectangle((x * Tile.Width) - offsetX, (y * Tile.Height) - offsetY, Tile.Width, Tile.Height),
-                        tile.GetSourceRectangle(tileMap.Rows[y + firstY].Columns[x + firstX].TileID),
+                        tile.GetSourceRectangle(tileID),
                         Color.White);
+                    }
                 }
             }
 
