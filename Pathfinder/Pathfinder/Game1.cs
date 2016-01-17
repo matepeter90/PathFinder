@@ -11,6 +11,10 @@ namespace Pathfinder
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        TileMap tileMap = new TileMap();
+        Tile tile = new Tile();
+        int visibleSquareWidth = 10;
+        int visibleSquareHeight = 10;
 
         public Game1()
         {
@@ -39,6 +43,7 @@ namespace Pathfinder
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            tile.TileSetTexture = Content.Load<Texture2D>("tileset");
 
             // TODO: use this.Content to load your game content here
         }
@@ -62,7 +67,26 @@ namespace Pathfinder
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            KeyboardState ks = Keyboard.GetState();
+            if (ks.IsKeyDown(Keys.Left))
+            {
+                Camera.Location.X = MathHelper.Clamp(Camera.Location.X - 2, 0, (tileMap.MapWidth - visibleSquareWidth) * 32);
+            }
+
+            if (ks.IsKeyDown(Keys.Right))
+            {
+                Camera.Location.X = MathHelper.Clamp(Camera.Location.X + 2, 0, (tileMap.MapWidth - visibleSquareWidth) * 32);
+            }
+
+            if (ks.IsKeyDown(Keys.Up))
+            {
+                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y - 2, 0, (tileMap.MapHeight - visibleSquareHeight) * 32);
+            }
+
+            if (ks.IsKeyDown(Keys.Down))
+            {
+                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y + 2, 0, (tileMap.MapHeight - visibleSquareHeight) * 32);
+            }
 
             base.Update(gameTime);
         }
@@ -75,7 +99,29 @@ namespace Pathfinder
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin();
+
+            Vector2 firstSquare = new Vector2(Camera.Location.X / 32, Camera.Location.Y / 32);
+            int firstX = (int)firstSquare.X;
+            int firstY = (int)firstSquare.Y;
+
+            Vector2 squareOffset = new Vector2(Camera.Location.X % 32, Camera.Location.Y % 32);
+            int offsetX = (int)squareOffset.X;
+            int offsetY = (int)squareOffset.Y;
+
+            for (int y = 0; y < visibleSquareHeight; y++)
+            {
+                for (int x = 0; x < visibleSquareWidth; x++)
+                {
+                    spriteBatch.Draw(
+                        tile.TileSetTexture,
+                        new Rectangle((x * 32) - offsetX, (y * 32) - offsetY, 32, 32),
+                        tile.GetSourceRectangle(tileMap.Rows[y + firstY].Columns[x + firstX].TileID),
+                        Color.White);
+                }
+            }
+
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
