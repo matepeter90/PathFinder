@@ -13,8 +13,10 @@ namespace Pathfinder
         SpriteBatch spriteBatch;
         TileMap tileMap = new TileMap();
         Tile tile = new Tile();
-        int visibleSquareWidth = 10;
-        int visibleSquareHeight = 10;
+        int visibleSquareWidth = 18;
+        int visibleSquareHeight = 42;
+        int baseOffsetX = -14;
+        int baseOffsetY = -14;
 
         public Game1()
         {
@@ -64,29 +66,35 @@ namespace Pathfinder
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            // Allows the game to exit
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+                this.Exit();
 
             KeyboardState ks = Keyboard.GetState();
             if (ks.IsKeyDown(Keys.Left))
             {
-                Camera.Location.X = MathHelper.Clamp(Camera.Location.X - 2, 0, (tileMap.MapWidth - visibleSquareWidth) * Tile.Width);
+                Camera.Location.X = MathHelper.Clamp(Camera.Location.X - 2, 0,
+                    (tileMap.MapWidth - visibleSquareWidth) * Tile.TileStepX);
             }
 
             if (ks.IsKeyDown(Keys.Right))
             {
-                Camera.Location.X = MathHelper.Clamp(Camera.Location.X + 2, 0, (tileMap.MapWidth - visibleSquareWidth) * Tile.Width);
+                Camera.Location.X = MathHelper.Clamp(Camera.Location.X + 2, 0,
+                    (tileMap.MapWidth - visibleSquareWidth) * Tile.TileStepX);
             }
 
             if (ks.IsKeyDown(Keys.Up))
             {
-                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y - 2, 0, (tileMap.MapHeight - visibleSquareHeight) * Tile.Height);
+                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y - 2, 0,
+                    (tileMap.MapHeight - visibleSquareHeight) * Tile.TileStepY);
             }
 
             if (ks.IsKeyDown(Keys.Down))
             {
-                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y + 2, 0, (tileMap.MapHeight - visibleSquareHeight) * Tile.Height);
+                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y + 2, 0,
+                    (tileMap.MapHeight - visibleSquareHeight) * Tile.TileStepY);
             }
+            // TODO: Add your update logic here
 
             base.Update(gameTime);
         }
@@ -121,8 +129,8 @@ namespace Pathfinder
                         spriteBatch.Draw(
                             tile.TileSetTexture,
                             new Rectangle(
-                                (x * Tile.TileStepX) - offsetX + rowOffset,
-                                (y * Tile.TileStepY) - offsetY,
+                                (x * Tile.TileStepX) - offsetX + rowOffset + baseOffsetX,
+                                (y * Tile.TileStepY) - offsetY + baseOffsetY,
                                 Tile.Width, Tile.Height),
                             tile.GetSourceRectangle(tileID),
                             Color.White);
