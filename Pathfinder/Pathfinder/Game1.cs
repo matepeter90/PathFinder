@@ -97,29 +97,35 @@ namespace Pathfinder
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
 
-            Vector2 firstSquare = new Vector2(Camera.Location.X / Tile.Width, Camera.Location.Y / Tile.Height);
+            Vector2 firstSquare = new Vector2(Camera.Location.X / Tile.TileStepX, Camera.Location.Y / Tile.TileStepY);
             int firstX = (int)firstSquare.X;
             int firstY = (int)firstSquare.Y;
 
-            Vector2 squareOffset = new Vector2(Camera.Location.X % Tile.Width, Camera.Location.Y % Tile.Height);
+            Vector2 squareOffset = new Vector2(Camera.Location.X % Tile.TileStepX, Camera.Location.Y % Tile.TileStepY);
             int offsetX = (int)squareOffset.X;
             int offsetY = (int)squareOffset.Y;
 
             for (int y = 0; y < visibleSquareHeight; y++)
             {
+                int rowOffset = 0;
+                if ((firstY + y) % 2 == 1)
+                    rowOffset = Tile.OddRowXOffset;
                 for (int x = 0; x < visibleSquareWidth; x++)
                 {
                     foreach (int tileID in tileMap.Rows[y + firstY].Columns[x + firstX].BaseTiles)
                     {
                         spriteBatch.Draw(
-                        tile.TileSetTexture,
-                        new Rectangle((x * Tile.Width) - offsetX, (y * Tile.Height) - offsetY, Tile.Width, Tile.Height),
-                        tile.GetSourceRectangle(tileID),
-                        Color.White);
+                            tile.TileSetTexture,
+                            new Rectangle(
+                                (x * Tile.TileStepX) - offsetX + rowOffset,
+                                (y * Tile.TileStepY) - offsetY,
+                                Tile.Width, Tile.Height),
+                            tile.GetSourceRectangle(tileID),
+                            Color.White);
                     }
                 }
             }
