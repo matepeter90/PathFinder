@@ -9,11 +9,16 @@ namespace Pathfinder
 {
     class Tile
     {
+        static public int Width = 48;
+        static public int Height = 48;
         public Texture2D TileSetTexture { get; set; }
 
         public Rectangle GetSourceRectangle(int tileIndex)
         {
-            return new Rectangle(tileIndex * 32, 0, 32, 32);
+            int tileY = tileIndex / (TileSetTexture.Width / Width);
+            int tileX = tileIndex % (TileSetTexture.Width / Width);
+
+            return new Rectangle(tileX * Width, tileY * Height, Width, Height);
         }
     }
 }

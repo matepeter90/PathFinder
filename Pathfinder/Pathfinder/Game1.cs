@@ -70,22 +70,22 @@ namespace Pathfinder
             KeyboardState ks = Keyboard.GetState();
             if (ks.IsKeyDown(Keys.Left))
             {
-                Camera.Location.X = MathHelper.Clamp(Camera.Location.X - 2, 0, (tileMap.MapWidth - visibleSquareWidth) * 32);
+                Camera.Location.X = MathHelper.Clamp(Camera.Location.X - 2, 0, (tileMap.MapWidth - visibleSquareWidth) * Tile.Width);
             }
 
             if (ks.IsKeyDown(Keys.Right))
             {
-                Camera.Location.X = MathHelper.Clamp(Camera.Location.X + 2, 0, (tileMap.MapWidth - visibleSquareWidth) * 32);
+                Camera.Location.X = MathHelper.Clamp(Camera.Location.X + 2, 0, (tileMap.MapWidth - visibleSquareWidth) * Tile.Width);
             }
 
             if (ks.IsKeyDown(Keys.Up))
             {
-                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y - 2, 0, (tileMap.MapHeight - visibleSquareHeight) * 32);
+                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y - 2, 0, (tileMap.MapHeight - visibleSquareHeight) * Tile.Height);
             }
 
             if (ks.IsKeyDown(Keys.Down))
             {
-                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y + 2, 0, (tileMap.MapHeight - visibleSquareHeight) * 32);
+                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y + 2, 0, (tileMap.MapHeight - visibleSquareHeight) * Tile.Height);
             }
 
             base.Update(gameTime);
@@ -101,11 +101,11 @@ namespace Pathfinder
 
             spriteBatch.Begin();
 
-            Vector2 firstSquare = new Vector2(Camera.Location.X / 32, Camera.Location.Y / 32);
+            Vector2 firstSquare = new Vector2(Camera.Location.X / Tile.Width, Camera.Location.Y / Tile.Height);
             int firstX = (int)firstSquare.X;
             int firstY = (int)firstSquare.Y;
 
-            Vector2 squareOffset = new Vector2(Camera.Location.X % 32, Camera.Location.Y % 32);
+            Vector2 squareOffset = new Vector2(Camera.Location.X % Tile.Width, Camera.Location.Y % Tile.Height);
             int offsetX = (int)squareOffset.X;
             int offsetY = (int)squareOffset.Y;
 
@@ -115,7 +115,7 @@ namespace Pathfinder
                 {
                     spriteBatch.Draw(
                         tile.TileSetTexture,
-                        new Rectangle((x * 32) - offsetX, (y * 32) - offsetY, 32, 32),
+                        new Rectangle((x * Tile.Width) - offsetX, (y * Tile.Height) - offsetY, Tile.Width, Tile.Height),
                         tile.GetSourceRectangle(tileMap.Rows[y + firstY].Columns[x + firstX].TileID),
                         Color.White);
                 }
