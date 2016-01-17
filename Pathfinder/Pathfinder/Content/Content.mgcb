@@ -24,3 +24,9 @@
 /processorParam:TextureFormat=Color
 /build:tileset.png
 
+#begin Arial6.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:Arial6.spritefont
+

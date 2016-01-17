@@ -10,13 +10,13 @@ namespace Pathfinder
         public List<MapCell> Columns = new List<MapCell>();
     }
 
-    class TileMap
+    class Map
     {
         public List<MapRow> Rows = new List<MapRow>();
         public int MapWidth = 50;
         public int MapHeight = 50;
 
-        public TileMap()
+        public Map()
         {
             for (int y = 0; y < MapHeight; y++)
             {
@@ -68,6 +68,33 @@ namespace Pathfinder
             Rows[5].Columns[5].TileID = 2;
             Rows[5].Columns[6].TileID = 2;
             Rows[5].Columns[7].TileID = 2;
+
+            Rows[16].Columns[4].AddHeightTile(54);
+
+            Rows[17].Columns[3].AddHeightTile(54);
+
+            Rows[15].Columns[3].AddHeightTile(54);
+            Rows[16].Columns[3].AddHeightTile(53);
+
+            Rows[15].Columns[4].AddHeightTile(54);
+            Rows[15].Columns[4].AddHeightTile(54);
+            Rows[15].Columns[4].AddHeightTile(51);
+
+            Rows[18].Columns[3].AddHeightTile(51);
+            Rows[19].Columns[3].AddHeightTile(50);
+            Rows[18].Columns[4].AddHeightTile(55);
+
+            Rows[14].Columns[4].AddHeightTile(54);
+
+            Rows[14].Columns[5].AddHeightTile(62);
+            Rows[14].Columns[5].AddHeightTile(61);
+            Rows[14].Columns[5].AddHeightTile(63);
+
+            Rows[17].Columns[4].AddTopperTile(114);
+            Rows[16].Columns[5].AddTopperTile(115);
+            Rows[14].Columns[4].AddTopperTile(125);
+            Rows[15].Columns[5].AddTopperTile(91);
+            Rows[16].Columns[6].AddTopperTile(94);
         }
     }
 }

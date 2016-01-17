@@ -9,11 +9,12 @@ namespace Pathfinder
 {
     class Tile
     {
-        static public int Width = 33;
-        static public int Height = 27;
-        static public int TileStepX = 50;
-        static public int TileStepY = 12;
-        static public int OddRowXOffset = 24;
+        static public int Width = 64;
+        static public int Height = 64;
+        static public int StepX = 64;
+        static public int StepY = 16;
+        static public int OddRowXOffset = 32;
+        static public int HeightTileOffset = 32;
         public Texture2D TileSetTexture { get; set; }
 
         public Rectangle GetSourceRectangle(int tileIndex)

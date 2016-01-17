@@ -11,12 +11,16 @@ namespace Pathfinder
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        TileMap tileMap = new TileMap();
+        bool showCoordinates = false;
+        SpriteFont font;
+        Map map = new Map();
         Tile tile = new Tile();
+        KeyboardState oldks;
         int visibleSquareWidth = 18;
         int visibleSquareHeight = 42;
-        int baseOffsetX = -14;
-        int baseOffsetY = -14;
+        int baseOffsetX = -32;
+        int baseOffsetY = -64;
+        float heightRowDepthMod = 0.0000001f;
 
         public Game1()
         {
@@ -46,6 +50,7 @@ namespace Pathfinder
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             tile.TileSetTexture = Content.Load<Texture2D>("tileset");
+            font = Content.Load<SpriteFont>("Arial6");
 
             // TODO: use this.Content to load your game content here
         }
@@ -74,27 +79,31 @@ namespace Pathfinder
             if (ks.IsKeyDown(Keys.Left))
             {
                 Camera.Location.X = MathHelper.Clamp(Camera.Location.X - 2, 0,
-                    (tileMap.MapWidth - visibleSquareWidth) * Tile.TileStepX);
+                    (map.MapWidth - visibleSquareWidth) * Tile.StepX);
             }
 
             if (ks.IsKeyDown(Keys.Right))
             {
                 Camera.Location.X = MathHelper.Clamp(Camera.Location.X + 2, 0,
-                    (tileMap.MapWidth - visibleSquareWidth) * Tile.TileStepX);
+                    (map.MapWidth - visibleSquareWidth) * Tile.StepX);
             }
 
             if (ks.IsKeyDown(Keys.Up))
             {
                 Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y - 2, 0,
-                    (tileMap.MapHeight - visibleSquareHeight) * Tile.TileStepY);
+                    (map.MapHeight - visibleSquareHeight) * Tile.StepY);
             }
 
             if (ks.IsKeyDown(Keys.Down))
             {
                 Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y + 2, 0,
-                    (tileMap.MapHeight - visibleSquareHeight) * Tile.TileStepY);
+                    (map.MapHeight - visibleSquareHeight) * Tile.StepY);
             }
-            // TODO: Add your update logic here
+            if (ks.IsKeyDown(Keys.C) && oldks.IsKeyUp(Keys.C))
+            {
+                showCoordinates = !showCoordinates;
+            }
+            oldks = ks;
 
             base.Update(gameTime);
         }
@@ -107,13 +116,15 @@ namespace Pathfinder
         {
             GraphicsDevice.Clear(Color.Black);
 
-            spriteBatch.Begin();
+            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            float maxdepth = ((map.MapWidth + 1) + ((map.MapHeight + 1) * Tile.Width)) * 10;
+            float depthOffset;
 
-            Vector2 firstSquare = new Vector2(Camera.Location.X / Tile.TileStepX, Camera.Location.Y / Tile.TileStepY);
+            Vector2 firstSquare = new Vector2(Camera.Location.X / Tile.StepX, Camera.Location.Y / Tile.StepY);
             int firstX = (int)firstSquare.X;
             int firstY = (int)firstSquare.Y;
 
-            Vector2 squareOffset = new Vector2(Camera.Location.X % Tile.TileStepX, Camera.Location.Y % Tile.TileStepY);
+            Vector2 squareOffset = new Vector2(Camera.Location.X % Tile.StepX, Camera.Location.Y % Tile.StepY);
             int offsetX = (int)squareOffset.X;
             int offsetY = (int)squareOffset.Y;
 
@@ -124,17 +135,66 @@ namespace Pathfinder
                     rowOffset = Tile.OddRowXOffset;
                 for (int x = 0; x < visibleSquareWidth; x++)
                 {
-                    foreach (int tileID in tileMap.Rows[y + firstY].Columns[x + firstX].BaseTiles)
+                    int mapx = (firstX + x);
+                    int mapy = (firstY + y);
+                    depthOffset = 0.7f - ((mapx + (mapy * Tile.Width)) / maxdepth);
+                    foreach (int tileID in map.Rows[mapy].Columns[mapx].BaseTiles)
                     {
                         spriteBatch.Draw(
                             tile.TileSetTexture,
                             new Rectangle(
-                                (x * Tile.TileStepX) - offsetX + rowOffset + baseOffsetX,
-                                (y * Tile.TileStepY) - offsetY + baseOffsetY,
+                                (x * Tile.StepX) - offsetX + rowOffset + baseOffsetX,
+                                (y * Tile.StepY) - offsetY + baseOffsetY,
                                 Tile.Width, Tile.Height),
                             tile.GetSourceRectangle(tileID),
-                            Color.White);
+                            Color.White,
+                            0.0f,
+                            Vector2.Zero,
+                            SpriteEffects.None,
+                            1.0f);
                     }
+
+                    int heightRow = 0;
+                    foreach (int tileID in map.Rows[mapy].Columns[mapx].HeightTiles)
+                    {
+                        spriteBatch.Draw(
+                            tile.TileSetTexture,
+                            new Rectangle(
+                                (x * Tile.StepX) - offsetX + rowOffset + baseOffsetX,
+                                (y * Tile.StepY) - offsetY + baseOffsetY - (heightRow * Tile.HeightTileOffset),
+                                Tile.Width, Tile.Height),
+                            tile.GetSourceRectangle(tileID),
+                            Color.White,
+                            0.0f,
+                            Vector2.Zero,
+                            SpriteEffects.None,
+                            depthOffset - ((float)heightRow * heightRowDepthMod));
+                        heightRow++;
+                    }
+
+                    foreach (int tileID in map.Rows[y + firstY].Columns[x + firstX].TopperTiles)
+                    {
+                        spriteBatch.Draw(
+                            tile.TileSetTexture,
+                            new Rectangle(
+                                (x * Tile.StepX) - offsetX + rowOffset + baseOffsetX,
+                                (y * Tile.StepY) - offsetY + baseOffsetY - (heightRow * Tile.HeightTileOffset),
+                                Tile.Width, Tile.Height),
+                            tile.GetSourceRectangle(tileID),
+                            Color.White,
+                            0.0f,
+                            Vector2.Zero,
+                            SpriteEffects.None,
+                            depthOffset - ((float)heightRow * heightRowDepthMod));
+                    }
+                    if (showCoordinates)
+                    {
+                        spriteBatch.DrawString(font, (x + firstX).ToString() + ", " + (y + firstY).ToString(),
+                                new Vector2((x * Tile.StepX) - offsetX + rowOffset + baseOffsetX + 24,
+                                (y * Tile.StepY) - offsetY + baseOffsetY + 48), Color.White, 0f, Vector2.Zero,
+                                1.0f, SpriteEffects.None, 0.0f);
+                    }
+
                 }
             }
 
