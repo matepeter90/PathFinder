@@ -13,7 +13,7 @@ namespace Pathfinder
         SpriteBatch spriteBatch;
         bool showCoordinates = false;
         SpriteFont font;
-        Map map = new Map();
+        Map map;
         Tile tile = new Tile();
         KeyboardState oldks;
         int visibleSquareWidth = 18;
@@ -21,6 +21,8 @@ namespace Pathfinder
         int baseOffsetX = -32;
         int baseOffsetY = -64;
         float heightRowDepthMod = 0.0000001f;
+        SpriteAnimation vlad;
+        Texture2D highlight;
 
         public Game1()
         {
@@ -36,8 +38,10 @@ namespace Pathfinder
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
+            Camera.ViewWidth = this.graphics.PreferredBackBufferWidth;
+            Camera.ViewHeight = this.graphics.PreferredBackBufferHeight;
+            Camera.DisplayOffset = new Vector2(baseOffsetX, baseOffsetY);
+            this.IsMouseVisible = true;
             base.Initialize();
         }
 
@@ -49,10 +53,37 @@ namespace Pathfinder
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            tile.TileSetTexture = Content.Load<Texture2D>("tileset");
-            font = Content.Load<SpriteFont>("Arial6");
+            tile.TileSetTexture = Content.Load<Texture2D>("Textures/Tilesets/tileset");
+            font = Content.Load<SpriteFont>("Fonts/Arial6");
+            map = new Map(Content.Load<Texture2D>("Textures/Tilesets/mousemap"));
+            Camera.WorldWidth = ((map.MapWidth - 2) * Tile.StepX);
+            Camera.WorldHeight = ((map.MapHeight - 2) * Tile.StepY);
+            highlight = Content.Load<Texture2D>("Textures/Tilesets/highlight");
 
-            // TODO: use this.Content to load your game content here
+            //Vlad to separate class or character class with common methods
+            vlad = new SpriteAnimation(Content.Load<Texture2D>("Textures/Characters/T_Vlad_Sword_Walking_48x48"));
+            vlad.AddAnimation("WalkEast", 0, 48 * 0, 48, 48, 8, 0.1f);
+            vlad.AddAnimation("WalkNorth", 0, 48 * 1, 48, 48, 8, 0.1f);
+            vlad.AddAnimation("WalkNorthEast", 0, 48 * 2, 48, 48, 8, 0.1f);
+            vlad.AddAnimation("WalkNorthWest", 0, 48 * 3, 48, 48, 8, 0.1f);
+            vlad.AddAnimation("WalkSouth", 0, 48 * 4, 48, 48, 8, 0.1f);
+            vlad.AddAnimation("WalkSouthEast", 0, 48 * 5, 48, 48, 8, 0.1f);
+            vlad.AddAnimation("WalkSouthWest", 0, 48 * 6, 48, 48, 8, 0.1f);
+            vlad.AddAnimation("WalkWest", 0, 48 * 7, 48, 48, 8, 0.1f);
+
+            vlad.AddAnimation("IdleEast", 0, 48 * 0, 48, 48, 1, 0.2f);
+            vlad.AddAnimation("IdleNorth", 0, 48 * 1, 48, 48, 1, 0.2f);
+            vlad.AddAnimation("IdleNorthEast", 0, 48 * 2, 48, 48, 1, 0.2f);
+            vlad.AddAnimation("IdleNorthWest", 0, 48 * 3, 48, 48, 1, 0.2f);
+            vlad.AddAnimation("IdleSouth", 0, 48 * 4, 48, 48, 1, 0.2f);
+            vlad.AddAnimation("IdleSouthEast", 0, 48 * 5, 48, 48, 1, 0.2f);
+            vlad.AddAnimation("IdleSouthWest", 0, 48 * 6, 48, 48, 1, 0.2f);
+            vlad.AddAnimation("IdleWest", 0, 48 * 7, 48, 48, 1, 0.2f);
+
+            vlad.Position = new Vector2(100, 100);
+            vlad.DrawOffset = new Vector2(-24, -38);
+            vlad.CurrentAnimation = "WalkEast";
+            vlad.IsAnimating = true;
         }
 
         /// <summary>
@@ -75,36 +106,86 @@ namespace Pathfinder
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
+            Vector2 moveVector = Vector2.Zero;
+            Vector2 moveDir = Vector2.Zero;
+            string animation = "";
+
             KeyboardState ks = Keyboard.GetState();
-            if (ks.IsKeyDown(Keys.Left))
+
+            if (ks.IsKeyDown(Keys.NumPad7))
             {
-                Camera.Location.X = MathHelper.Clamp(Camera.Location.X - 2, 0,
-                    (map.MapWidth - visibleSquareWidth) * Tile.StepX);
+                moveDir = new Vector2(-2, -1);
+                animation = "WalkNorthWest";
+                moveVector += new Vector2(-2, -1);
             }
 
-            if (ks.IsKeyDown(Keys.Right))
+            if (ks.IsKeyDown(Keys.NumPad8))
             {
-                Camera.Location.X = MathHelper.Clamp(Camera.Location.X + 2, 0,
-                    (map.MapWidth - visibleSquareWidth) * Tile.StepX);
+                moveDir = new Vector2(0, -1);
+                animation = "WalkNorth";
+                moveVector += new Vector2(0, -1);
             }
 
-            if (ks.IsKeyDown(Keys.Up))
+            if (ks.IsKeyDown(Keys.NumPad9))
             {
-                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y - 2, 0,
-                    (map.MapHeight - visibleSquareHeight) * Tile.StepY);
+                moveDir = new Vector2(2, -1);
+                animation = "WalkNorthEast";
+                moveVector += new Vector2(2, -1);
             }
 
-            if (ks.IsKeyDown(Keys.Down))
+            if (ks.IsKeyDown(Keys.NumPad4))
             {
-                Camera.Location.Y = MathHelper.Clamp(Camera.Location.Y + 2, 0,
-                    (map.MapHeight - visibleSquareHeight) * Tile.StepY);
+                moveDir = new Vector2(-2, 0);
+                animation = "WalkWest";
+                moveVector += new Vector2(-2, 0);
             }
+
+            if (ks.IsKeyDown(Keys.NumPad6))
+            {
+                moveDir = new Vector2(2, 0);
+                animation = "WalkEast";
+                moveVector += new Vector2(2, 0);
+            }
+
+            if (ks.IsKeyDown(Keys.NumPad1))
+            {
+                moveDir = new Vector2(-2, 1);
+                animation = "WalkSouthWest";
+                moveVector += new Vector2(-2, 1);
+            }
+
+            if (ks.IsKeyDown(Keys.NumPad2))
+            {
+                moveDir = new Vector2(0, 1);
+                animation = "WalkSouth";
+                moveVector += new Vector2(0, 1);
+            }
+
+            if (ks.IsKeyDown(Keys.NumPad3))
+            {
+                moveDir = new Vector2(2, 1);
+                animation = "WalkSouthEast";
+                moveVector += new Vector2(2, 1);
+            }
+
+            if (moveDir.Length() != 0)
+            {
+                vlad.MoveBy((int)moveDir.X, (int)moveDir.Y);
+                if (vlad.CurrentAnimation != animation)
+                    vlad.CurrentAnimation = animation;
+            }
+            else
+            {
+                vlad.CurrentAnimation = "Idle" + vlad.CurrentAnimation.Substring(4);
+            }
+
             if (ks.IsKeyDown(Keys.C) && oldks.IsKeyUp(Keys.C))
             {
                 showCoordinates = !showCoordinates;
             }
             oldks = ks;
 
+            vlad.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -138,35 +219,38 @@ namespace Pathfinder
                     int mapx = (firstX + x);
                     int mapy = (firstY + y);
                     depthOffset = 0.7f - ((mapx + (mapy * Tile.Width)) / maxdepth);
+                    if ((mapx >= map.MapWidth) || (mapy >= map.MapHeight))
+                        continue;
                     foreach (int tileID in map.Rows[mapy].Columns[mapx].BaseTiles)
                     {
                         spriteBatch.Draw(
+
                             tile.TileSetTexture,
-                            new Rectangle(
-                                (x * Tile.StepX) - offsetX + rowOffset + baseOffsetX,
-                                (y * Tile.StepY) - offsetY + baseOffsetY,
-                                Tile.Width, Tile.Height),
+                            Camera.WorldToScreen(
+                                new Vector2((mapx * Tile.StepX) + rowOffset, mapy * Tile.StepY)),
                             tile.GetSourceRectangle(tileID),
                             Color.White,
                             0.0f,
                             Vector2.Zero,
+                            1.0f,
                             SpriteEffects.None,
                             1.0f);
                     }
-
                     int heightRow = 0;
+
                     foreach (int tileID in map.Rows[mapy].Columns[mapx].HeightTiles)
                     {
                         spriteBatch.Draw(
                             tile.TileSetTexture,
-                            new Rectangle(
-                                (x * Tile.StepX) - offsetX + rowOffset + baseOffsetX,
-                                (y * Tile.StepY) - offsetY + baseOffsetY - (heightRow * Tile.HeightTileOffset),
-                                Tile.Width, Tile.Height),
+                            Camera.WorldToScreen(
+                                new Vector2(
+                                    (mapx * Tile.StepX) + rowOffset,
+                                    mapy * Tile.StepY - (heightRow * Tile.HeightTileOffset))),
                             tile.GetSourceRectangle(tileID),
                             Color.White,
                             0.0f,
                             Vector2.Zero,
+                            1.0f,
                             SpriteEffects.None,
                             depthOffset - ((float)heightRow * heightRowDepthMod));
                         heightRow++;
@@ -176,14 +260,13 @@ namespace Pathfinder
                     {
                         spriteBatch.Draw(
                             tile.TileSetTexture,
-                            new Rectangle(
-                                (x * Tile.StepX) - offsetX + rowOffset + baseOffsetX,
-                                (y * Tile.StepY) - offsetY + baseOffsetY - (heightRow * Tile.HeightTileOffset),
-                                Tile.Width, Tile.Height),
+                            Camera.WorldToScreen(
+                                new Vector2((mapx * Tile.StepX) + rowOffset, mapy * Tile.StepY)),
                             tile.GetSourceRectangle(tileID),
                             Color.White,
                             0.0f,
                             Vector2.Zero,
+                            1.0f,
                             SpriteEffects.None,
                             depthOffset - ((float)heightRow * heightRowDepthMod));
                     }
@@ -194,10 +277,33 @@ namespace Pathfinder
                                 (y * Tile.StepY) - offsetY + baseOffsetY + 48), Color.White, 0f, Vector2.Zero,
                                 1.0f, SpriteEffects.None, 0.0f);
                     }
-
                 }
             }
+            Vector2 highlightLoc = Camera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
+            Point hilightPoint = map.WorldToMapCell(new Point((int)highlightLoc.X, (int)highlightLoc.Y));
 
+            vlad.Draw(spriteBatch, 0, 0);
+
+            int hilightrowOffset = 0;
+            if ((hilightPoint.Y) % 2 == 1)
+                hilightrowOffset = Tile.OddRowXOffset;
+
+            spriteBatch.Draw(
+                            highlight,
+                            Camera.WorldToScreen(
+
+                                new Vector2(
+
+                                    (hilightPoint.X * Tile.StepX) + hilightrowOffset,
+
+                                    (hilightPoint.Y + 2) * Tile.StepY)),
+                            new Rectangle(0, 0, 64, 32),
+                            Color.White * 0.3f,
+                            0.0f,
+                            Vector2.Zero,
+                            1.0f,
+                            SpriteEffects.None,
+                            0.0f);
             spriteBatch.End();
 
             base.Draw(gameTime);
