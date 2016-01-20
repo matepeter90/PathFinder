@@ -130,7 +130,7 @@ namespace Pathfinder
             {
                 slopeMaps.GetData(0, new Rectangle(texturePoint.X, texturePoint.Y, 1, 1), slopeColor, 0, 1);
 
-                int offset = (int)(((float)(255 - slopeColor[0].R) / 255f) * Tile.HeightTileOffset);
+                int offset = (int)(((float)(255 - slopeColor[0].R) / 255f) * Tile.HeightOffset);
 
                 return offset;
             }
@@ -232,7 +232,7 @@ namespace Pathfinder
         public int GetOverallHeight(Point worldPoint)
         {
             Point mapCellPoint = WorldToMapCell(worldPoint);
-            int height = Rows[mapCellPoint.Y].Columns[mapCellPoint.X].HeightTiles.Count * Tile.HeightTileOffset;
+            int height = Rows[mapCellPoint.Y].Columns[mapCellPoint.X].HeightTiles.Count * Tile.HeightOffset;
             height += GetSlopeHeightAtWorldPoint(worldPoint);
 
             return height;

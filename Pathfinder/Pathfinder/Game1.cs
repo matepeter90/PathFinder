@@ -12,7 +12,7 @@ namespace Pathfinder
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        bool showCoordinates = false;
+        bool debugMode = false;
         SpriteFont font;
         Map map;
         Tile tile = new Tile();
@@ -24,6 +24,7 @@ namespace Pathfinder
         float heightRowDepthMod = 0.0000001f;
         SpriteAnimation vlad;
         Texture2D highlight;
+        Texture2D border;
 
         public Game1()
         {
@@ -61,6 +62,7 @@ namespace Pathfinder
             Camera.WorldWidth = ((map.MapWidth - 2) * Tile.StepX);
             Camera.WorldHeight = ((map.MapHeight - 2) * Tile.StepY);
             highlight = Content.Load<Texture2D>("Textures/Tilesets/highlight");
+            border = Content.Load<Texture2D>("Textures/Tilesets/border");
 
             //Vlad to separate class or character class with common methods
             vlad = new SpriteAnimation(Content.Load<Texture2D>("Textures/Characters/T_Vlad_Sword_Walking_48x48"));
@@ -193,7 +195,7 @@ namespace Pathfinder
 
             if (ks.IsKeyDown(Keys.C) && oldks.IsKeyUp(Keys.C))
             {
-                showCoordinates = !showCoordinates;
+                debugMode = !debugMode;
             }
             oldks = ks;
 
@@ -244,7 +246,6 @@ namespace Pathfinder
                     foreach (int tileID in map.Rows[mapy].Columns[mapx].BaseTiles)
                     {
                         spriteBatch.Draw(
-
                             tile.TileSetTexture,
                             Camera.WorldToScreen(
                                 new Vector2((mapx * Tile.StepX) + rowOffset, mapy * Tile.StepY)),
@@ -256,6 +257,7 @@ namespace Pathfinder
                             SpriteEffects.None,
                             1.0f);
                     }
+
                     int heightRow = 0;
 
                     foreach (int tileID in map.Rows[mapy].Columns[mapx].HeightTiles)
@@ -264,10 +266,41 @@ namespace Pathfinder
                             tile.TileSetTexture,
                             Camera.WorldToScreen(
                                 new Vector2(
-                                    (mapx * Tile.StepX) + rowOffset,
-                                    mapy * Tile.StepY - (heightRow * Tile.HeightTileOffset))),
+                                    mapx * Tile.StepX + rowOffset,
+                                    mapy * Tile.StepY - (heightRow * Tile.HeightOffset))),
                             tile.GetSourceRectangle(tileID),
                             Color.White,
+                            0.0f,
+                            Vector2.Zero,
+                            1.0f,
+                            SpriteEffects.None,
+                            depthOffset - ((float)heightRow * heightRowDepthMod));
+                        heightRow++;
+                    }
+
+                    if (debugMode)
+                    {
+                        Color debugColor = new Color(255, 255 - heightRow * 50, 255 - heightRow * 50);
+                        spriteBatch.Draw(
+                            border,
+                            Camera.WorldToScreen(
+                                new Vector2(
+                                    mapx * Tile.StepX + rowOffset,
+                                    mapy * Tile.StepY - ((heightRow - 1) * Tile.HeightOffset))),
+                            new Rectangle(0, 0, 64, 32),
+                            debugColor,
+                            0.0f,
+                            Vector2.Zero,
+                            1.0f,
+                            SpriteEffects.None,
+                            depthOffset - ((float)heightRow * heightRowDepthMod));
+                        spriteBatch.DrawString(
+                            font,
+                            mapx.ToString() + ", " + mapy.ToString(),
+                            new Vector2((x * Tile.StepX) - offsetX + rowOffset + baseOffsetX + 24,
+                                        ((y * Tile.StepY) - offsetY + baseOffsetY + 48)
+                                        - (heightRow * Tile.HeightOffset)),
+                            debugColor,
                             0.0f,
                             Vector2.Zero,
                             1.0f,
@@ -290,13 +323,7 @@ namespace Pathfinder
                             SpriteEffects.None,
                             depthOffset - ((float)heightRow * heightRowDepthMod));
                     }
-                    if (showCoordinates)
-                    {
-                        spriteBatch.DrawString(font, (x + firstX).ToString() + ", " + (y + firstY).ToString(),
-                                new Vector2((x * Tile.StepX) - offsetX + rowOffset + baseOffsetX + 24,
-                                (y * Tile.StepY) - offsetY + baseOffsetY + 48), Color.White, 0f, Vector2.Zero,
-                                1.0f, SpriteEffects.None, 0.0f);
-                    }
+
                     if ((mapx == vladMapPoint.X) && (mapy == vladMapPoint.Y))
                     {
                         vlad.DrawDepth = depthOffset - (float)(heightRow + 2) * heightRowDepthMod;
@@ -315,11 +342,8 @@ namespace Pathfinder
             spriteBatch.Draw(
                             highlight,
                             Camera.WorldToScreen(
-
                                 new Vector2(
-
                                     (hilightPoint.X * Tile.StepX) + hilightrowOffset,
-
                                     (hilightPoint.Y + 2) * Tile.StepY)),
                             new Rectangle(0, 0, 64, 32),
                             Color.White * 0.3f,

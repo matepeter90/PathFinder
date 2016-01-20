@@ -14,7 +14,7 @@ namespace Pathfinder
         static public int StepX = 64;
         static public int StepY = 16;
         static public int OddRowXOffset = 32;
-        static public int HeightTileOffset = 32;
+        static public int HeightOffset = 32;
         public Texture2D TileSetTexture { get; set; }
 
         public Rectangle GetSourceRectangle(int tileIndex)
