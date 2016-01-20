@@ -60,6 +60,7 @@
     <Content Include="Content\Textures\Characters\T_Vlad_Sword_Walking_48x48.png" />
     <Content Include="Content\Textures\Tilesets\highlight.png" />
     <Content Include="Content\Textures\Tilesets\mousemap.png" />
+    <Content Include="Content\Textures\Tilesets\slopemap.png" />
     <Content Include="Content\Textures\Tilesets\tileset.png" />
     <Content Include="Icon.ico" />
   </ItemGroup>

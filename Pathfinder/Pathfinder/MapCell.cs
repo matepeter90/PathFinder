@@ -21,10 +21,14 @@ namespace Pathfinder
         public List<int> BaseTiles = new List<int>();
         public List<int> HeightTiles = new List<int>();
         public List<int> TopperTiles = new List<int>();
+        public bool Walkable { get; set; }
+        public int SlopeMap { get; set; }
 
         public MapCell(int tileID)
         {
             TileID = tileID;
+            Walkable = true;
+            SlopeMap = -1;
         }
 
         public void AddBaseTile(int tileID)

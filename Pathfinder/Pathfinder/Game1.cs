@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace Pathfinder
 {
@@ -55,7 +56,8 @@ namespace Pathfinder
             spriteBatch = new SpriteBatch(GraphicsDevice);
             tile.TileSetTexture = Content.Load<Texture2D>("Textures/Tilesets/tileset");
             font = Content.Load<SpriteFont>("Fonts/Arial6");
-            map = new Map(Content.Load<Texture2D>("Textures/Tilesets/mousemap"));
+            map = new Map(Content.Load<Texture2D>("Textures/Tilesets/mousemap"),
+                          Content.Load<Texture2D>(@"Textures\TileSets\slopemap"));
             Camera.WorldWidth = ((map.MapWidth - 2) * Tile.StepX);
             Camera.WorldHeight = ((map.MapHeight - 2) * Tile.StepY);
             highlight = Content.Load<Texture2D>("Textures/Tilesets/highlight");
@@ -168,6 +170,16 @@ namespace Pathfinder
                 moveVector += new Vector2(2, 1);
             }
 
+            if (map.GetCellAtWorldPoint(vlad.Position + moveDir).Walkable == false)
+            {
+                moveDir = Vector2.Zero;
+            }
+
+            if (Math.Abs(map.GetOverallHeight(vlad.Position) - map.GetOverallHeight(vlad.Position + moveDir)) > 10)
+            {
+                moveDir = Vector2.Zero;
+            }
+
             if (moveDir.Length() != 0)
             {
                 vlad.MoveBy((int)moveDir.X, (int)moveDir.Y);
@@ -207,6 +219,7 @@ namespace Pathfinder
             spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
             float maxdepth = ((map.MapWidth + 1) + ((map.MapHeight + 1) * Tile.Width)) * 10;
             float depthOffset;
+            Point vladMapPoint = map.WorldToMapCell(new Point((int)vlad.Position.X, (int)vlad.Position.Y));
 
             Vector2 firstSquare = new Vector2(Camera.Location.X / Tile.StepX, Camera.Location.Y / Tile.StepY);
             int firstX = (int)firstSquare.X;
@@ -284,14 +297,16 @@ namespace Pathfinder
                                 (y * Tile.StepY) - offsetY + baseOffsetY + 48), Color.White, 0f, Vector2.Zero,
                                 1.0f, SpriteEffects.None, 0.0f);
                     }
+                    if ((mapx == vladMapPoint.X) && (mapy == vladMapPoint.Y))
+                    {
+                        vlad.DrawDepth = depthOffset - (float)(heightRow + 2) * heightRowDepthMod;
+                    }
                 }
             }
             Vector2 highlightLoc = Camera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
             Point hilightPoint = map.WorldToMapCell(new Point((int)highlightLoc.X, (int)highlightLoc.Y));
 
-            Point vladStandingOn = map.WorldToMapCell(new Point((int)vlad.Position.X, (int)vlad.Position.Y));
-            int vladHeight = map.Rows[vladStandingOn.Y].Columns[vladStandingOn.X].HeightTiles.Count * Tile.HeightTileOffset;
-            vlad.Draw(spriteBatch, 0, -vladHeight);
+            vlad.Draw(spriteBatch, 0, (-1)*map.GetOverallHeight(vlad.Position));
 
             int hilightrowOffset = 0;
             if ((hilightPoint.Y) % 2 == 1)
