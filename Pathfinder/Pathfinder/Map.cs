@@ -16,7 +16,6 @@ namespace Pathfinder
     {
         public List<MapRow> Rows = new List<MapRow>();
         private Texture2D mouseMap;
-
         private Texture2D slopeMaps;
         public int MapWidth = 50;
         public int MapHeight = 50;
@@ -157,13 +156,13 @@ namespace Pathfinder
             int dx = 0;
             int dy = 0;
 
-            uint[] myUint = new uint[1];
+            Color[] mouseColor = new Color[1];
 
             if (new Rectangle(0, 0, mouseMap.Width, mouseMap.Height).Contains(localPointX, localPointY))
             {
-                mouseMap.GetData(0, new Rectangle(localPointX, localPointY, 1, 1), myUint, 0, 1);
+                mouseMap.GetData(0, new Rectangle(localPointX, localPointY, 1, 1), mouseColor, 0, 1);
 
-                if (myUint[0] == 0xFF0000FF) // Red
+                if (mouseColor[0] == Color.Red)
                 {
                     dx = -1;
                     dy = -1;
@@ -171,7 +170,7 @@ namespace Pathfinder
                     localPointY = localPointY + (mouseMap.Height / 2);
                 }
 
-                if (myUint[0] == 0xFF00FF00) // Green
+                if (mouseColor[0] == Color.Green)
                 {
                     dx = -1;
                     localPointX = localPointX + (mouseMap.Width / 2);
@@ -179,14 +178,14 @@ namespace Pathfinder
                     localPointY = localPointY - (mouseMap.Height / 2);
                 }
 
-                if (myUint[0] == 0xFF00FFFF) // Yellow
+                if (mouseColor[0] == Color.Yellow)
                 {
                     dy = -1;
                     localPointX = localPointX - (mouseMap.Width / 2);
                     localPointY = localPointY + (mouseMap.Height / 2);
                 }
 
-                if (myUint[0] == 0xFFFF0000) // Blue
+                if (mouseColor[0] == Color.Blue)
                 {
                     dy = +1;
                     localPointX = localPointX - (mouseMap.Width / 2);
