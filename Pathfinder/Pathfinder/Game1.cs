@@ -13,7 +13,8 @@ namespace Pathfinder
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         bool debugMode = false;
-        SpriteFont font;
+        SpriteFont Arial6;
+        SpriteFont Arial12;
         Map map;
         Tile tile = new Tile();
         KeyboardState oldks;
@@ -25,6 +26,7 @@ namespace Pathfinder
         SpriteAnimation vlad;
         Texture2D highlight;
         Texture2D border;
+        Texture2D debugHUD;
 
         public Game1()
         {
@@ -56,13 +58,17 @@ namespace Pathfinder
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             tile.TileSetTexture = Content.Load<Texture2D>("Textures/Tilesets/tileset");
-            font = Content.Load<SpriteFont>("Fonts/Arial6");
+            Arial6 = Content.Load<SpriteFont>("Fonts/Arial6");
+            Arial12 = Content.Load<SpriteFont>("Fonts/Arial12");
             map = new Map(Content.Load<Texture2D>("Textures/Tilesets/mousemap"),
                           Content.Load<Texture2D>(@"Textures\TileSets\slopemap"));
             Camera.WorldWidth = ((map.MapWidth - 2) * Tile.StepX);
             Camera.WorldHeight = ((map.MapHeight - 2) * Tile.StepY);
             highlight = Content.Load<Texture2D>("Textures/Tilesets/highlight");
             border = Content.Load<Texture2D>("Textures/Tilesets/border");
+            debugHUD = new Texture2D(GraphicsDevice, 1, 1);
+            debugHUD.SetData(new Color[] { Color.White });
+
 
             //Vlad to separate class or character class with common methods
             vlad = new SpriteAnimation(Content.Load<Texture2D>("Textures/Characters/T_Vlad_Sword_Walking_48x48"));
@@ -295,7 +301,7 @@ namespace Pathfinder
                             SpriteEffects.None,
                             depthOffset - ((float)heightRow * heightRowDepthMod));
                         spriteBatch.DrawString(
-                            font,
+                            Arial6,
                             mapx.ToString() + ", " + mapy.ToString(),
                             new Vector2((x * Tile.StepX) - offsetX + rowOffset + baseOffsetX + 24,
                                         ((y * Tile.StepY) - offsetY + baseOffsetY + 48)
@@ -331,20 +337,99 @@ namespace Pathfinder
                 }
             }
             Vector2 highlightLoc = Camera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
-            Point hilightPoint = map.WorldToMapCell(new Point((int)highlightLoc.X, (int)highlightLoc.Y));
+            Point highlightWorldLoc = new Point((int)highlightLoc.X, (int)highlightLoc.Y);
+            Point hilightOriginPoint = map.WorldToMapCell(highlightWorldLoc);
 
             vlad.Draw(spriteBatch, 0, (-1)*map.GetOverallHeight(vlad.Position));
 
             int hilightrowOffset = 0;
-            if ((hilightPoint.Y) % 2 == 1)
+            if ((hilightOriginPoint.Y) % 2 == 1)
                 hilightrowOffset = Tile.OddRowXOffset;
+
+            if (debugMode)
+            {
+                float debugHUDOriginX = GraphicsDevice.Viewport.Width - 110;
+                float debugHUDOriginY = 0;
+                spriteBatch.Draw(
+                           debugHUD,
+                           new Vector2(debugHUDOriginX, debugHUDOriginY),
+                           new Rectangle(0, 0, 110, 120),
+                           Color.LightGray,
+                            0.0f,
+                            Vector2.Zero,
+                            1.0f,
+                            SpriteEffects.None,
+                            0.1f);
+                MapCell cell = map.GetCellAtWorldPoint(highlightLoc);
+                MapCell[] neighbours = map.GetNeighbours(highlightWorldLoc);
+                if (cell != null)
+                {
+                    spriteBatch.DrawString(
+                     Arial12,
+                     "Cell: " + cell.X + ", " + cell.Y,
+                     new Vector2(debugHUDOriginX + 10, debugHUDOriginY + 10),
+                     Color.Black,
+                     0.0f,
+                     Vector2.Zero,
+                     1.0f,
+                     SpriteEffects.None,
+                     0.05f);
+                }
+                if (neighbours[0] != null)
+                {
+                    spriteBatch.DrawString(
+                     Arial12,
+                     "Up: " + neighbours[0].X + ", " + neighbours[0].Y, 
+                     new Vector2(debugHUDOriginX + 10 ,debugHUDOriginY + 30),
+                     Color.Black,
+                     0.0f,
+                     Vector2.Zero,
+                     1.0f,
+                     SpriteEffects.None,
+                     0.05f);
+                }
+                if (neighbours[1] != null)
+                {
+                    spriteBatch.DrawString(
+                     Arial12,
+                     "Right: " + neighbours[1].X + ", " + neighbours[1].Y,
+                     new Vector2(debugHUDOriginX + 10 , debugHUDOriginY + 50),
+                     Color.Black,
+                     0.0f,
+                     Vector2.Zero,
+                     1.0f,
+                     SpriteEffects.None,
+                     0.05f);
+                }
+                if (neighbours[2] != null)
+                {
+                    spriteBatch.DrawString(
+                     Arial12,
+                     "Down: " + neighbours[2].X + ", " + neighbours[2].Y,
+                     new Vector2(debugHUDOriginX + 10, debugHUDOriginY + 70),
+                     Color.Black,
+                     0.0f,
+                     Vector2.Zero,
+                     1.0f,
+                     SpriteEffects.None,
+                     0.05f);
+                }
+                if (neighbours[3] != null)
+                {
+                    spriteBatch.DrawString(
+                     Arial12,
+                     "Left: " + neighbours[3].X.ToString() + ", " + neighbours[3].Y.ToString(),
+                     new Vector2(debugHUDOriginX + 10, debugHUDOriginY + 90),
+                     Color.Black);
+                }
+            }
 
             spriteBatch.Draw(
                             highlight,
                             Camera.WorldToScreen(
                                 new Vector2(
-                                    (hilightPoint.X * Tile.StepX) + hilightrowOffset,
-                                    (hilightPoint.Y + 2) * Tile.StepY)),
+                                    (hilightOriginPoint.X * Tile.StepX) + hilightrowOffset,
+                                    (hilightOriginPoint.Y + 2) * Tile.StepY)),
                             new Rectangle(0, 0, 64, 32),
                             Color.White * 0.3f,
                             0.0f,

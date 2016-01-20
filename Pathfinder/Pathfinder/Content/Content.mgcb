@@ -85,3 +85,9 @@
 /processorParam:TextureFormat=Color
 /build:Textures/Tilesets/border.png
 
+#begin Fonts/Arial12.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Arial12.spritefont
+

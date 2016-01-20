@@ -29,7 +29,7 @@ namespace Pathfinder
                 MapRow thisRow = new MapRow();
                 for (int x = 0; x < MapWidth; x++)
                 {
-                    thisRow.Columns.Add(new MapCell(0));
+                    thisRow.Columns.Add(new MapCell(x,y,0));
                 }
                 Rows.Add(thisRow);
             }
@@ -122,6 +122,27 @@ namespace Pathfinder
             Rows[14].Columns[9].SlopeMap = 4;
         }
 
+        public MapCell[] GetNeighbours(Point worldPoint)
+        {
+            Point cell = WorldToMapCell(worldPoint);
+            MapCell up = null;
+            MapCell right = null;
+            MapCell down = null;
+            MapCell left = null;
+            if(cell.Y % 2 == 1)
+            {
+                cell.X += 1;
+            }
+            if (cell.Y > 0 && cell.X > 0 && cell.Y < MapHeight && cell.X < MapWidth)
+            {
+                up = Rows[cell.Y - 1].Columns[cell.X - 1];
+                right = Rows[cell.Y - 1].Columns[cell.X];
+                down = Rows[cell.Y + 1].Columns[cell.X];
+                left = Rows[cell.Y + 1].Columns[cell.X - 1];
+            }
+            return new MapCell[] { up, right, down, left };
+        }
+
         public int GetSlopeMapHeight(Point localPixel, int slopeMap)
         {
             Point texturePoint = new Point(slopeMap * mouseMap.Width + localPixel.X, localPixel.Y);
@@ -208,8 +229,10 @@ namespace Pathfinder
 
         public MapCell GetCellAtWorldPoint(Point worldPoint)
         {
-            Point mapPoint = WorldToMapCell(worldPoint);
-            return Rows[mapPoint.Y].Columns[mapPoint.X];
+            Point cell = WorldToMapCell(worldPoint);
+            if (cell.Y >= 0 && cell.X >= 0 && cell.Y <= MapHeight && cell.X <= MapWidth)
+                return Rows[cell.Y].Columns[cell.X];
+            return null;
         }
 
         public MapCell GetCellAtWorldPoint(Vector2 worldPoint)

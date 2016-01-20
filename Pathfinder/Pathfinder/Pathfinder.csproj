@@ -69,6 +69,7 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Content\Fonts\Arial12.spritefont" />
     <None Include="Content\Fonts\Arial6.spritefont" />
   </ItemGroup>
   <ItemGroup />
