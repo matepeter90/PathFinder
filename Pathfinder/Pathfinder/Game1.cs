@@ -185,6 +185,13 @@ namespace Pathfinder
             }
             oldks = ks;
 
+            float vladX = MathHelper.Clamp(
+                vlad.Position.X, 0 + (-2) * vlad.DrawOffset.X, Camera.WorldWidth);
+            float vladY = MathHelper.Clamp(
+                vlad.Position.Y, 0 + (-2)* vlad.DrawOffset.Y, Camera.WorldHeight);
+
+            vlad.Position = new Vector2(vladX, vladY);
+
             vlad.Update(gameTime);
             base.Update(gameTime);
         }
@@ -282,7 +289,9 @@ namespace Pathfinder
             Vector2 highlightLoc = Camera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
             Point hilightPoint = map.WorldToMapCell(new Point((int)highlightLoc.X, (int)highlightLoc.Y));
 
-            vlad.Draw(spriteBatch, 0, 0);
+            Point vladStandingOn = map.WorldToMapCell(new Point((int)vlad.Position.X, (int)vlad.Position.Y));
+            int vladHeight = map.Rows[vladStandingOn.Y].Columns[vladStandingOn.X].HeightTiles.Count * Tile.HeightTileOffset;
+            vlad.Draw(spriteBatch, 0, -vladHeight);
 
             int hilightrowOffset = 0;
             if ((hilightPoint.Y) % 2 == 1)
