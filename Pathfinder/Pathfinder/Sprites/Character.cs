@@ -210,7 +210,6 @@ namespace Pathfinder
             DrawOffset = Vector2.Zero;
             DrawDepth = 0.0f;
             Target = new Point(-1, -1);
-            MoveVector = Vector2.Zero;
             MoveDir = Vector2.Zero;
             Animation = "";
         }
