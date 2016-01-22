@@ -266,13 +266,13 @@ namespace Pathfinder
             {
                 if (Target.X >= 0 && Target.Y >= 0)
                 {
-                    if (Position.X < Target.X)
-                        MoveDir += new Vector2(2, 0);
-                    if (Position.X > Target.X)
-                        MoveDir += new Vector2(-2, 0);
-                    if (Position.Y < Target.Y)
+                    if ((int)Position.X < (int)Target.X)
+                        MoveDir += new Vector2(1, 0);
+                    if ((int)Position.X > (int)Target.X)
+                        MoveDir += new Vector2(-1, 0);
+                    if ((int)Position.Y < (int)Target.Y)
                         MoveDir += new Vector2(0, 1);
-                    if (Position.Y > Target.Y)
+                    if ((int)Position.Y > (int)Target.Y)
                         MoveDir += new Vector2(0, -1);
                     
                 }
@@ -316,8 +316,8 @@ namespace Pathfinder
             string animation = "Walk";
             if (MoveDir.Y == 1) animation += "South";
             if (MoveDir.Y == -1) animation += "North";
-            if (MoveDir.X == 2) animation += "East";
-            if (MoveDir.X == -2) animation += "West";
+            if (MoveDir.X == 1) animation += "East";
+            if (MoveDir.X == -1) animation += "West";
             if (animation == "Walk")
                 CurrentAnimation = "Idle" + CurrentAnimation.Substring(4);
             else if(CurrentAnimation != animation)
