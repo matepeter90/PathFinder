@@ -4,11 +4,15 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace Pathfinder
 {
-    class SpriteAnimation
+    class Character
     {
+        public Vector2 MoveDir { get; set; }
+        public string Animation { get; set; }
+        public Point Target { get; set; }
         public Vector2 DrawOffset { get; set; }
         public float DrawDepth { get; set; }
 
@@ -200,11 +204,15 @@ namespace Pathfinder
             }
         }
 
-        public SpriteAnimation(Texture2D Texture)
+        public Character(Texture2D Texture)
         {
             t2dTexture = Texture;
             DrawOffset = Vector2.Zero;
             DrawDepth = 0.0f;
+            Target = new Point(-1, -1);
+            MoveVector = Vector2.Zero;
+            MoveDir = Vector2.Zero;
+            Animation = "";
         }
 
         void UpdateRotation()
@@ -250,6 +258,68 @@ namespace Pathfinder
             v2Position.X += x;
             v2Position.Y += y;
             UpdateRotation();
+        }
+
+        public void Move(Map map, bool manualControl, KeyboardState ks)
+        {
+            MoveDir = Vector2.Zero;
+            if (!manualControl)
+            {
+                if (Target.X >= 0 && Target.Y >= 0)
+                {
+                    if (Position.X < Target.X)
+                        MoveDir += new Vector2(2, 0);
+                    if (Position.X > Target.X)
+                        MoveDir += new Vector2(-2, 0);
+                    if (Position.Y < Target.Y)
+                        MoveDir += new Vector2(0, 1);
+                    if (Position.Y > Target.Y)
+                        MoveDir += new Vector2(0, -1);
+                    
+                }
+
+                if (Position.X == Target.X && Position.Y == Target.Y)
+                    Target = new Point(-1, -1);
+            }
+            else
+            {
+                if (ks.IsKeyDown(Keys.NumPad7)) MoveDir = new Vector2(-2, -1);
+                if (ks.IsKeyDown(Keys.NumPad8)) MoveDir = new Vector2(0, -1);
+                if (ks.IsKeyDown(Keys.NumPad9)) MoveDir = new Vector2(2, -1);
+                if (ks.IsKeyDown(Keys.NumPad4)) MoveDir = new Vector2(-2, 0);
+                if (ks.IsKeyDown(Keys.NumPad6)) MoveDir = new Vector2(2, 0);
+                if (ks.IsKeyDown(Keys.NumPad1)) MoveDir = new Vector2(-2, 1);
+                if (ks.IsKeyDown(Keys.NumPad2)) MoveDir = new Vector2(0, 1);
+                if (ks.IsKeyDown(Keys.NumPad3)) MoveDir = new Vector2(2, 1);
+            }
+
+            if (map.GetCellAtWorldPoint(Position + MoveDir).Walkable == false)
+            {
+                MoveDir = Vector2.Zero;
+            }
+
+            if (Math.Abs(map.GetOverallHeight(Position) - map.GetOverallHeight(Position + MoveDir)) > 16)
+            {
+                MoveDir = Vector2.Zero;
+            }
+
+            MoveBy((int)MoveDir.X, (int)MoveDir.Y);
+            SetMoveAnimation();
+        }
+
+        public void SetMoveAnimation()
+        {
+            string animation = "Walk";
+            if (MoveDir.Y == 1) animation += "South";
+            if (MoveDir.Y == -1) animation += "North";
+            if (MoveDir.X == 2) animation += "East";
+            if (MoveDir.X == -2) animation += "West";
+            if (animation == "Walk")
+                CurrentAnimation = "Idle" + CurrentAnimation.Substring(4);
+            else if(CurrentAnimation != animation)
+            {
+                CurrentAnimation = animation;
+            }
         }
 
         public void Update(GameTime gameTime)

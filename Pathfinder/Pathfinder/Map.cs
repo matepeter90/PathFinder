@@ -19,6 +19,7 @@ namespace Pathfinder
         private Texture2D slopeMaps;
         public int MapWidth = 50;
         public int MapHeight = 50;
+        public int prevHeightOffset = 0;
 
         public Map(Texture2D mouseMap, Texture2D slopeMaps)
         {
@@ -147,16 +148,19 @@ namespace Pathfinder
         {
             Point texturePoint = new Point(slopeMap * mouseMap.Width + localPixel.X, localPixel.Y);
             Color[] slopeColor = new Color[1];
+            int offset = 0;
             if (new Rectangle(0, 0, slopeMaps.Width, slopeMaps.Height).Contains(texturePoint.X, texturePoint.Y))
             {
                 slopeMaps.GetData(0, new Rectangle(texturePoint.X, texturePoint.Y, 1, 1), slopeColor, 0, 1);
-
-                int offset = (int)(((float)(255 - slopeColor[0].R) / 255f) * Tile.HeightOffset);
-
-                return offset;
+                if (slopeColor[0].R == slopeColor[0].G && slopeColor[0].R == slopeColor[0].B)
+                {
+                    offset = (int)(((float)(255 - slopeColor[0].G) / 255f) * Tile.HeightOffset);
+                    prevHeightOffset = offset;
+                }
+                else
+                    offset = prevHeightOffset;
             }
-
-            return 0;
+            return offset;
         }
 
         public Point WorldToMapCell(Point worldPoint)

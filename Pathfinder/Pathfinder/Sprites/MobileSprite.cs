@@ -10,7 +10,7 @@ namespace Pathfinder
     class MobileSprite
     {
         // The SpriteAnimation object that holds the graphical and animation data for this object
-        SpriteAnimation asSprite;
+        Character asSprite;
 
         // A queue of pathing vectors to allow the sprite to move along a path
         Queue<Vector2> queuePath = new Queue<Vector2>();
@@ -59,7 +59,7 @@ namespace Pathfinder
         // current animation on the sprite.
         string sEndPathAnimation = null;
 
-        public SpriteAnimation Sprite
+        public Character Sprite
         {
             get { return asSprite; }
         }
@@ -167,7 +167,7 @@ namespace Pathfinder
 
         public MobileSprite(Texture2D texture)
         {
-            asSprite = new SpriteAnimation(texture);
+            asSprite = new Character(texture);
         }
 
         public void AddPathNode(Vector2 node)
