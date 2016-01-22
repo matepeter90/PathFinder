@@ -19,6 +19,7 @@ namespace Pathfinder
         Map map;
         Tile tile = new Tile();
         KeyboardState oldks;
+        MouseState oldms;
         int visibleSquareWidth = 18;
         int visibleSquareHeight = 42;
         int baseOffsetX = -32;
@@ -118,8 +119,10 @@ namespace Pathfinder
                 this.Exit();
 
             
-
             KeyboardState ks = Keyboard.GetState();
+            MouseState ms = Mouse.GetState();
+            if (ms.LeftButton == ButtonState.Pressed && oldms.LeftButton == ButtonState.Released)
+                vlad.Target = ms.Position;
 
             vlad.Move(map, manualControl, ks);
 
@@ -127,18 +130,13 @@ namespace Pathfinder
             {
                 debugMode = !debugMode;
             }
+
             if (ks.IsKeyDown(Keys.X) && oldks.IsKeyUp(Keys.X))
             {
                 manualControl = !manualControl;
             }
             oldks = ks;
-
-            float vladX = MathHelper.Clamp(
-                vlad.Position.X, 0 + (-2) * vlad.DrawOffset.X, Camera.WorldWidth);
-            float vladY = MathHelper.Clamp(
-                vlad.Position.Y, 0 + (-2) * vlad.DrawOffset.Y, Camera.WorldHeight);
-
-            vlad.Position = new Vector2(vladX, vladY);
+            oldms = ms;
 
             vlad.Update(gameTime);
             base.Update(gameTime);

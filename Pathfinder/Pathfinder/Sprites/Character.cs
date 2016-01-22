@@ -304,6 +304,11 @@ namespace Pathfinder
 
             MoveBy((int)MoveDir.X, (int)MoveDir.Y);
             SetMoveAnimation();
+
+            float x = MathHelper.Clamp(Position.X, 0 + (-2) * DrawOffset.X, Camera.WorldWidth);
+            float y = MathHelper.Clamp(Position.Y, 0 + (-2) * DrawOffset.Y, Camera.WorldHeight);
+
+            Position = new Vector2(x, y);
         }
 
         public void SetMoveAnimation()
