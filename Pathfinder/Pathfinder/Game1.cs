@@ -121,8 +121,12 @@ namespace Pathfinder
             
             KeyboardState ks = Keyboard.GetState();
             MouseState ms = Mouse.GetState();
+
             if (ms.LeftButton == ButtonState.Pressed && oldms.LeftButton == ButtonState.Released)
-                vlad.Target = ms.Position;
+            {
+                Vector2 mouseLoc = Camera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
+                vlad.Target = new Point((int)mouseLoc.X, (int)mouseLoc.Y);
+            }
 
             vlad.Move(map, manualControl, ks);
 
