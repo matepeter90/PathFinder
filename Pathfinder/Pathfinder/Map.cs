@@ -293,6 +293,11 @@ namespace Pathfinder
             return height;
         }
 
+        public int GetCellHeight(MapCell cell)
+        {
+            return Rows[cell.Y].Columns[cell.X].HeightTiles.Count * Tile.HeightOffset;
+        }
+
         public int GetOverallHeight(Vector2 worldPoint)
         {
             return GetOverallHeight(new Point((int)worldPoint.X, (int)worldPoint.Y));
@@ -319,8 +324,10 @@ namespace Pathfinder
                 {
                     if (neighbour.Value == null)
                         continue;
-                    if (neighbour.Value.Walkable)
-                    {
+                    if (neighbour.Value.Walkable &&
+                        Math.Abs(GetCellHeight(currentCell.Cell) 
+                        - GetCellHeight(neighbour.Value)) < 16)
+                    { 
                         if (closedList.Any(x => x.Cell == neighbour.Value))
                             continue;
                         Node element = openList.Where(x => x.Cell == neighbour.Value).FirstOrDefault();
