@@ -16,11 +16,11 @@ namespace Pathfinder
     {
         public MapCell Cell { get; set; }
         public Node Parent { get; set; }
-        public int Total { get { return Heuristic + Cost; } }
-        public int Heuristic { get; set; }
-        public int Cost { get; set; }
+        public float Total { get { return Heuristic + Cost; } }
+        public float Heuristic { get; set; }
+        public float Cost { get; set; }
 
-        public Node(MapCell cell, Node parent, int cost, int heur)
+        public Node(MapCell cell, Node parent, float cost, float heur)
         {
             Cell = cell;
             Heuristic = heur;
@@ -28,7 +28,7 @@ namespace Pathfinder
             Cost = cost;
         }
 
-        public int getTotal()
+        public float getTotal()
         {
             return Heuristic + Cost;
         }
@@ -150,22 +150,23 @@ namespace Pathfinder
         {
             Dictionary<String, MapCell> neighbours = new Dictionary<string, MapCell>();
             Point cell = new Point(selectedcell.X, selectedcell.Y);
+            int newX = cell.X;
             if (cell.Y % 2 == 1)
-                cell.X += 1;
-            if (cell.Y > 0 && cell.X > 0)
-                neighbours.Add("N", Rows[cell.Y - 1].Columns[cell.X - 1]);
-            if (cell.Y > 1 && cell.X <= MapWidth)
+               newX += 1;
+            if (cell.Y > 0 && newX > 0)
+                neighbours.Add("N", Rows[cell.Y - 1].Columns[newX - 1]);
+            if (cell.Y > 1 && cell.X < MapWidth)
                 neighbours.Add("NE", Rows[cell.Y - 2].Columns[cell.X]);
-            if (cell.Y > 0 && cell.X <= MapWidth)
-                neighbours.Add("E", Rows[cell.Y - 1].Columns[cell.X]);
-            if (cell.Y < MapWidth && cell.X < MapWidth)
+            if (cell.Y > 0 && newX < MapWidth)
+                neighbours.Add("E", Rows[cell.Y - 1].Columns[newX]);
+            if (cell.Y < MapWidth && cell.X < (MapWidth - 1))
                 neighbours.Add("SE", Rows[cell.Y].Columns[cell.X + 1]);
-            if (cell.Y < MapHeight && cell.X <= MapWidth)
-                neighbours.Add("S", Rows[cell.Y + 1].Columns[cell.X]);
-            if (cell.Y < (MapWidth - 1) && cell.X <= MapWidth)
+            if (cell.Y < (MapHeight-1) && newX < MapWidth)
+                neighbours.Add("S", Rows[cell.Y + 1].Columns[newX]);
+            if (cell.Y < (MapWidth - 2) && cell.X < MapWidth)
                 neighbours.Add("SW", Rows[cell.Y + 2].Columns[cell.X]);
-            if (cell.Y < MapHeight && cell.X > 0)
-                neighbours.Add("W", Rows[cell.Y + 1].Columns[cell.X - 1]);
+            if (cell.Y < (MapHeight - 1) && newX > 0)
+                neighbours.Add("W", Rows[cell.Y + 1].Columns[newX - 1]);
             if (cell.Y < MapHeight && cell.X > 0)
                 neighbours.Add("NW", Rows[cell.Y].Columns[cell.X - 1]);
             return neighbours;
@@ -302,9 +303,9 @@ namespace Pathfinder
         {
             return GetOverallHeight(new Point((int)worldPoint.X, (int)worldPoint.Y));
         }
-        public int distance(MapCell cell, MapCell target)
+        public float distance(MapCell cell, MapCell target)
         {
-            return (int)Math.Sqrt(Math.Pow(cell.X - target.X, 2) + Math.Pow(cell.Y - target.Y, 2));
+            return (float)Math.Sqrt(Math.Pow(cell.X - target.X, 2) + Math.Pow(cell.Y - target.Y, 2));
         }
         public List<Point> getPath(Point start, Point target)
         {
@@ -324,25 +325,31 @@ namespace Pathfinder
                 {
                     if (neighbour.Value == null)
                         continue;
+                    int height = Math.Abs(GetCellHeight(currentCell.Cell)
+                        - GetCellHeight(neighbour.Value));
                     if (neighbour.Value.Walkable &&
-                        Math.Abs(GetCellHeight(currentCell.Cell) 
-                        - GetCellHeight(neighbour.Value)) < 16)
+                       height < 16)
                     { 
                         if (closedList.Any(x => x.Cell == neighbour.Value))
                             continue;
                         Node element = openList.Where(x => x.Cell == neighbour.Value).FirstOrDefault();
+                        float cost = currentCell.Cost + 1;
+                        if (neighbour.Key.Length == 2)
+                            cost += 0.2f;
                         if (element == null)
                         {
+                            if (neighbour.Key.Length == 2)
+                                cost += 0.2f;
                             openList.Add(new Node(
                                     neighbour.Value,
                                     currentCell,
-                                    currentCell.Cost + 1,
+                                    cost,
                                     distance(neighbour.Value, targetCell)));
                         }
                         else
                         {
-                            int cost = currentCell.Cost + 1 + distance(neighbour.Value, targetCell);
-                            if (cost < element.getTotal())
+                            float newCost = cost + distance(neighbour.Value, targetCell);
+                            if (newCost < element.getTotal())
                             {
                                 element.Parent = currentCell;
                             }

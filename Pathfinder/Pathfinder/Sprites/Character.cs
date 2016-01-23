@@ -323,11 +323,6 @@ namespace Pathfinder
                 if (ks.IsKeyDown(Keys.NumPad3)) MoveDir = new Vector2(2, 1);
             }
 
-            if (map.GetCellAtWorldPoint(Position + MoveDir).Walkable == false)
-            {
-                MoveDir = Vector2.Zero;
-            }
-
             if (Math.Abs(map.GetOverallHeight(Position) - map.GetOverallHeight(Position + MoveDir)) > 16)
             {
                 MoveDir = Vector2.Zero;
