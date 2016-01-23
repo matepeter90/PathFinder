@@ -303,7 +303,7 @@ namespace Pathfinder
         }
         public List<MapCell> getPath(Point start, Point target)
         {
-            List<MapCell> closedList = new List<MapCell>();
+            List<Node> closedList = new List<Node>();
             List<Node> openList = new List<Node>();
             MapCell startCell = GetCellAtWorldPoint(start);
             MapCell targetCell = GetCellAtWorldPoint(target);
@@ -311,9 +311,9 @@ namespace Pathfinder
             do
             {
                 var currentCell = openList.Aggregate((curMin, x) => (x.getTotal() < curMin.getTotal()) ? x : curMin);
-                closedList.Add(currentCell.Cell);
+                closedList.Add(currentCell);
                 openList.Remove(currentCell);
-                if (closedList.Contains(targetCell))
+                if (closedList.Any(x => x.Cell == targetCell))
                     break;
                 foreach (var neighbour in GetNeighbours(currentCell.Cell))
                 {
@@ -321,7 +321,7 @@ namespace Pathfinder
                         continue;
                     if (neighbour.Value.Walkable)
                     {
-                        if (closedList.Contains(neighbour.Value))
+                        if (closedList.Any(x => x.Cell == neighbour.Value))
                             continue;
                         Node element = openList.Where(x => x.Cell == neighbour.Value).FirstOrDefault();
                         if (element == null)
@@ -344,7 +344,7 @@ namespace Pathfinder
                 }
 
             } while (openList.Count > 0);
-            var node = openList.Where(x => x.Cell == targetCell).FirstOrDefault();
+            var node = closedList.Where(x => x.Cell == targetCell).FirstOrDefault();
             List<MapCell> path = new List<MapCell>();
             if (node != null)
             {
