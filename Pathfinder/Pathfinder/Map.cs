@@ -12,6 +12,29 @@ namespace Pathfinder
         public List<MapCell> Columns = new List<MapCell>();
     }
 
+    class Node
+    {
+        public MapCell Cell { get; set; }
+        public Node Parent { get; set; }
+        public int Total { get { return Heuristic + Cost; } }
+        public int Heuristic { get; set; }
+        public int Cost { get; set; }
+
+        public Node(MapCell cell, Node parent, int cost, int heur)
+        {
+            Cell = cell;
+            Heuristic = heur;
+            Parent = parent;
+            Cost = cost;
+        }
+
+        public int getTotal()
+        {
+            return Heuristic + Cost;
+        }
+
+    }
+
     class Map
     {
         public List<MapRow> Rows = new List<MapRow>();
@@ -123,25 +146,29 @@ namespace Pathfinder
             Rows[14].Columns[9].SlopeMap = 4;
         }
 
-        public MapCell[] GetNeighbours(Point worldPoint)
+        public Dictionary<String,MapCell> GetNeighbours(MapCell selectedcell)
         {
-            Point cell = WorldToMapCell(worldPoint);
-            MapCell up = null;
-            MapCell right = null;
-            MapCell down = null;
-            MapCell left = null;
-            if(cell.Y % 2 == 1)
-            {
+            Dictionary<String, MapCell> neighbours = new Dictionary<string, MapCell>();
+            Point cell = new Point(selectedcell.X, selectedcell.Y);
+            if (cell.Y % 2 == 1)
                 cell.X += 1;
-            }
-            if (cell.Y > 0 && cell.X > 0 && cell.Y < MapHeight && cell.X < MapWidth)
-            {
-                up = Rows[cell.Y - 1].Columns[cell.X - 1];
-                right = Rows[cell.Y - 1].Columns[cell.X];
-                down = Rows[cell.Y + 1].Columns[cell.X];
-                left = Rows[cell.Y + 1].Columns[cell.X - 1];
-            }
-            return new MapCell[] { up, right, down, left };
+            if (cell.Y > 0 && cell.X > 0)
+                neighbours.Add("N", Rows[cell.Y - 1].Columns[cell.X - 1]);
+            if (cell.Y > 1 && cell.X <= MapWidth)
+                neighbours.Add("NE", Rows[cell.Y - 2].Columns[cell.X]);
+            if (cell.Y > 0 && cell.X <= MapWidth)
+                neighbours.Add("E", Rows[cell.Y - 1].Columns[cell.X]);
+            if (cell.Y < MapWidth && cell.X < MapWidth)
+                neighbours.Add("SE", Rows[cell.Y].Columns[cell.X + 1]);
+            if (cell.Y < MapHeight && cell.X <= MapWidth)
+                neighbours.Add("S", Rows[cell.Y + 1].Columns[cell.X]);
+            if (cell.Y < (MapWidth - 1) && cell.X <= MapWidth)
+                neighbours.Add("SW", Rows[cell.Y + 2].Columns[cell.X]);
+            if (cell.Y < MapHeight && cell.X > 0)
+                neighbours.Add("W", Rows[cell.Y + 1].Columns[cell.X - 1]);
+            if (cell.Y < MapHeight && cell.X > 0)
+                neighbours.Add("NW", Rows[cell.Y].Columns[cell.X - 1]);
+            return neighbours;
         }
 
         public int GetSlopeMapHeight(Point localPixel, int slopeMap)
@@ -243,6 +270,7 @@ namespace Pathfinder
         {
             return GetCellAtWorldPoint(new Point((int)worldPoint.X, (int)worldPoint.Y));
         }
+
         public int GetSlopeHeightAtWorldPoint(Point worldPoint)
         {
             Point localPoint;
@@ -268,6 +296,67 @@ namespace Pathfinder
         public int GetOverallHeight(Vector2 worldPoint)
         {
             return GetOverallHeight(new Point((int)worldPoint.X, (int)worldPoint.Y));
+        }
+        public int distance(MapCell cell, MapCell target)
+        {
+            return (int)Math.Sqrt(Math.Pow(cell.X - target.X, 2) + Math.Pow(cell.Y - target.Y, 2));
+        }
+        public List<MapCell> getPath(Point start, Point target)
+        {
+            List<MapCell> closedList = new List<MapCell>();
+            List<Node> openList = new List<Node>();
+            MapCell startCell = GetCellAtWorldPoint(start);
+            MapCell targetCell = GetCellAtWorldPoint(target);
+            openList.Add(new Node(startCell, null, 0, distance(startCell, targetCell)));
+            do
+            {
+                var currentCell = openList.Aggregate((curMin, x) => (x.getTotal() < curMin.getTotal()) ? x : curMin);
+                closedList.Add(currentCell.Cell);
+                openList.Remove(currentCell);
+                if (closedList.Contains(targetCell))
+                    break;
+                foreach (var neighbour in GetNeighbours(currentCell.Cell))
+                {
+                    if (neighbour.Value == null)
+                        continue;
+                    if (neighbour.Value.Walkable)
+                    {
+                        if (closedList.Contains(neighbour.Value))
+                            continue;
+                        Node element = openList.Where(x => x.Cell == neighbour.Value).FirstOrDefault();
+                        if (element == null)
+                        {
+                            openList.Add(new Node(
+                                    neighbour.Value,
+                                    currentCell,
+                                    currentCell.Cost + 1,
+                                    distance(neighbour.Value, targetCell)));
+                        }
+                        else
+                        {
+                            int cost = currentCell.Cost + 1 + distance(neighbour.Value, targetCell);
+                            if (cost < element.getTotal())
+                            {
+                                element.Parent = currentCell;
+                            }
+                        }
+                    }
+                }
+
+            } while (openList.Count > 0);
+            var node = openList.Where(x => x.Cell == targetCell).FirstOrDefault();
+            List<MapCell> path = new List<MapCell>();
+            if (node != null)
+            {
+                do
+                {
+                    path.Add(node.Cell);
+                    node = node.Parent;
+                } while (node.Parent != null);
+            }
+            path.Reverse();
+            return path;
+
         }
     }
 }

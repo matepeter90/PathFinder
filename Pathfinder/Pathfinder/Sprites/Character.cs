@@ -15,6 +15,7 @@ namespace Pathfinder
         public Point Target { get; set; }
         public Vector2 DrawOffset { get; set; }
         public float DrawDepth { get; set; }
+        public List<MapCell> path;
 
         // The texture that holds the images for this sprite
         Texture2D t2dTexture;
@@ -212,6 +213,7 @@ namespace Pathfinder
             Target = new Point(-1, -1);
             MoveDir = Vector2.Zero;
             Animation = "";
+            path = new List<MapCell>();
         }
 
         void UpdateRotation()
@@ -251,6 +253,13 @@ namespace Pathfinder
             }
         }
 
+        public void SetTarget(Map map, Point target)
+        {
+            path = map.getPath(new Point((int)Position.X, (int)Position.Y), target);
+            Target = new Point(path[0].X * Tile.StepX, path[0].Y * Tile.StepY);
+            path.RemoveAt(0);
+        }
+
         public void MoveBy(int x, int y)
         {
             v2LastPosition = v2Position;
@@ -278,7 +287,18 @@ namespace Pathfinder
                 }
 
                 if (Position.X == Target.X && Position.Y == Target.Y)
-                    Target = new Point(-1, -1);
+                {
+                    if (path.Count > 0)
+                    {
+                        Target = new Point(path[0].X * Tile.StepX, path[0].Y * Tile.StepY);
+                        path.RemoveAt(0);
+                    }
+                    else
+                    {
+                        Target = new Point(-1, -1);
+                    }
+                }
+                
             }
             else
             {

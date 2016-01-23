@@ -125,7 +125,7 @@ namespace Pathfinder
             if (ms.LeftButton == ButtonState.Pressed && oldms.LeftButton == ButtonState.Released)
             {
                 Vector2 mouseLoc = Camera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
-                vlad.Target = new Point((int)mouseLoc.X, (int)mouseLoc.Y);
+                vlad.SetTarget(map, new Point((int)mouseLoc.X, (int)mouseLoc.Y));
             }
 
             vlad.Move(map, manualControl, ks);
@@ -283,7 +283,7 @@ namespace Pathfinder
                 spriteBatch.Draw(
                      debugHUD,
                      new Vector2(debugHUDOriginX, debugHUDOriginY),
-                     new Rectangle(0, 0, 110, 140),
+                     new Rectangle(0, 0, 110, GraphicsDevice.Viewport.Height),
                      Color.LightGray,
                      0.0f,
                      Vector2.Zero,
@@ -291,92 +291,35 @@ namespace Pathfinder
                      SpriteEffects.None,
                      0.1f);
                 MapCell cell = map.GetCellAtWorldPoint(highlightLoc);
-                MapCell[] neighbours = map.GetNeighbours(highlightWorldLoc);
                 if (cell != null)
                 {
+                    int yOffset = 10;
                     spriteBatch.DrawString(
                          Arial12,
                          "Current: " + cell.X + ", " + cell.Y,
-                         new Vector2(debugHUDOriginX + 10, debugHUDOriginY + 10),
+                         new Vector2(debugHUDOriginX + 10, debugHUDOriginY + yOffset),
                          Color.Black,
                          0.0f,
                          Vector2.Zero,
                          1.0f,
                          SpriteEffects.None,
                          0.05f);
-                }
-                if (neighbours[0] != null)
-                {
-                    spriteBatch.DrawString(
+                    foreach (var neighbour in map.GetNeighbours(cell))
+                    {
+                        yOffset += 20;
+                        spriteBatch.DrawString(
                          Arial12,
-                         "Up: " + neighbours[0].X + ", " + neighbours[0].Y,
-                         new Vector2(debugHUDOriginX + 10, debugHUDOriginY + 30),
+                         neighbour.Key + ": " + neighbour.Value.X + ", " + neighbour.Value.Y,
+                         new Vector2(debugHUDOriginX + 10, debugHUDOriginY + yOffset),
                          Color.Black,
                          0.0f,
                          Vector2.Zero,
                          1.0f,
                          SpriteEffects.None,
                          0.05f);
+                    }
                 }
-                if (neighbours[1] != null)
-                {
-                    spriteBatch.DrawString(
-                         Arial12,
-                         "Right: " + neighbours[1].X + ", " + neighbours[1].Y,
-                         new Vector2(debugHUDOriginX + 10, debugHUDOriginY + 50),
-                         Color.Black,
-                         0.0f,
-                         Vector2.Zero,
-                         1.0f,
-                         SpriteEffects.None,
-                         0.05f);
-                }
-                if (neighbours[2] != null)
-                {
-                    spriteBatch.DrawString(
-                         Arial12,
-                         "Down: " + neighbours[2].X + ", " + neighbours[2].Y,
-                         new Vector2(debugHUDOriginX + 10, debugHUDOriginY + 70),
-                         Color.Black,
-                         0.0f,
-                         Vector2.Zero,
-                         1.0f,
-                         SpriteEffects.None,
-                         0.05f);
-                }
-                if (neighbours[3] != null)
-                {
-                    spriteBatch.DrawString(
-                        Arial12,
-                        "Left: " + neighbours[3].X.ToString() + ", " + neighbours[3].Y.ToString(),
-                        new Vector2(debugHUDOriginX + 10, debugHUDOriginY + 90),
-                        Color.Black);
-                }
-                spriteBatch.DrawString(
-                         Arial12,
-                         "Height: " + map.GetOverallHeight(vlad.Position),
-                         new Vector2(debugHUDOriginX + 10, debugHUDOriginY + 110),
-                         Color.Black,
-                         0.0f,
-                         Vector2.Zero,
-                         1.0f,
-                         SpriteEffects.None,
-                         0.05f);
             }
-
-            spriteBatch.Draw(
-                            highlight,
-                            Camera.WorldToScreen(
-                                new Vector2(
-                                    (hilightOriginPoint.X * Tile.StepX) + hilightrowOffset,
-                                    (hilightOriginPoint.Y + 2) * Tile.StepY)),
-                            new Rectangle(0, 0, 64, 32),
-                            Color.White * 0.3f,
-                            0.0f,
-                            Vector2.Zero,
-                            1.0f,
-                            SpriteEffects.None,
-                            0.0f);
             spriteBatch.End();
 
             base.Draw(gameTime);
