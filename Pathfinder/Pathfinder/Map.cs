@@ -48,102 +48,18 @@ namespace Pathfinder
         {
             this.mouseMap = mouseMap;
             this.slopeMaps = slopeMaps;
+            Random r = new Random(DateTime.Today.Second);
             for (int y = 0; y < MapHeight; y++)
             {
                 MapRow thisRow = new MapRow();
                 for (int x = 0; x < MapWidth; x++)
                 {
                     thisRow.Columns.Add(new MapCell(x,y,0));
+                    if (r.Next(0, 100) < 40)
+                        thisRow.Columns[x].AddHeightTile(54);
                 }
                 Rows.Add(thisRow);
             }
-
-            Rows[0].Columns[3].TileID = 3;
-            Rows[0].Columns[4].TileID = 3;
-            Rows[0].Columns[5].TileID = 1;
-            Rows[0].Columns[6].TileID = 1;
-            Rows[0].Columns[7].TileID = 1;
-
-            Rows[1].Columns[3].TileID = 3;
-            Rows[1].Columns[4].TileID = 1;
-            Rows[1].Columns[5].TileID = 1;
-            Rows[1].Columns[6].TileID = 1;
-            Rows[1].Columns[7].TileID = 1;
-
-            Rows[2].Columns[2].TileID = 3;
-            Rows[2].Columns[3].TileID = 1;
-            Rows[2].Columns[4].TileID = 1;
-            Rows[2].Columns[5].TileID = 1;
-            Rows[2].Columns[6].TileID = 1;
-            Rows[2].Columns[7].TileID = 1;
-
-            Rows[3].Columns[2].TileID = 3;
-            Rows[3].Columns[3].TileID = 1;
-            Rows[3].Columns[4].TileID = 1;
-            Rows[3].Columns[5].TileID = 2;
-            Rows[3].Columns[6].TileID = 2;
-            Rows[3].Columns[7].TileID = 2;
-
-            Rows[4].Columns[2].TileID = 3;
-            Rows[4].Columns[3].TileID = 1;
-            Rows[4].Columns[4].TileID = 1;
-            Rows[4].Columns[5].TileID = 2;
-            Rows[4].Columns[6].TileID = 2;
-            Rows[4].Columns[7].TileID = 2;
-
-            Rows[5].Columns[2].TileID = 3;
-            Rows[5].Columns[3].TileID = 1;
-            Rows[5].Columns[4].TileID = 1;
-            Rows[5].Columns[5].TileID = 2;
-            Rows[5].Columns[6].TileID = 2;
-            Rows[5].Columns[7].TileID = 2;
-
-            Rows[16].Columns[4].AddHeightTile(54);
-
-            Rows[17].Columns[3].AddHeightTile(54);
-
-            Rows[15].Columns[3].AddHeightTile(54);
-            Rows[16].Columns[3].AddHeightTile(53);
-
-            Rows[15].Columns[4].AddHeightTile(54);
-            Rows[15].Columns[4].AddHeightTile(54);
-            Rows[15].Columns[4].AddHeightTile(51);
-
-            Rows[18].Columns[3].AddHeightTile(51);
-            Rows[19].Columns[3].AddHeightTile(50);
-            Rows[18].Columns[4].AddHeightTile(55);
-
-            Rows[14].Columns[4].AddHeightTile(54);
-
-            Rows[14].Columns[5].AddHeightTile(62);
-            Rows[14].Columns[5].AddHeightTile(61);
-            Rows[14].Columns[5].AddHeightTile(63);
-
-            Rows[17].Columns[4].AddTopperTile(114);
-            Rows[16].Columns[5].AddTopperTile(115);
-            Rows[14].Columns[4].AddTopperTile(125);
-            Rows[15].Columns[5].AddTopperTile(91);
-            Rows[16].Columns[6].AddTopperTile(94);
-            Rows[15].Columns[5].Walkable = false;
-            Rows[16].Columns[6].Walkable = false;
-
-            Rows[12].Columns[9].AddHeightTile(34);
-            Rows[11].Columns[9].AddHeightTile(34);
-            Rows[11].Columns[8].AddHeightTile(34);
-            Rows[10].Columns[9].AddHeightTile(34);
-
-            Rows[12].Columns[8].AddTopperTile(31);
-            Rows[12].Columns[8].SlopeMap = 0;
-            Rows[13].Columns[8].AddTopperTile(31);
-            Rows[13].Columns[8].SlopeMap = 0;
-
-            Rows[12].Columns[10].AddTopperTile(32);
-            Rows[12].Columns[10].SlopeMap = 1;
-            Rows[13].Columns[9].AddTopperTile(32);
-            Rows[13].Columns[9].SlopeMap = 1;
-
-            Rows[14].Columns[9].AddTopperTile(30);
-            Rows[14].Columns[9].SlopeMap = 4;
         }
 
         public Dictionary<String,MapCell> GetNeighbours(MapCell selectedcell)
@@ -321,14 +237,25 @@ namespace Pathfinder
                 openList.Remove(currentCell);
                 if (closedList.Any(x => x.Cell == targetCell))
                     break;
-                foreach (var neighbour in GetNeighbours(currentCell.Cell))
+                var neighbours = GetNeighbours(currentCell.Cell);
+                foreach (var neighbour in neighbours)
                 {
                     if (neighbour.Value == null)
                         continue;
-                    int height = Math.Abs(GetCellHeight(currentCell.Cell)
-                        - GetCellHeight(neighbour.Value));
-                    if (neighbour.Value.Walkable &&
-                       height < 16)
+                    bool canWalkthrough = true;
+                    if(neighbour.Key.Length == 2)
+                    {
+                        try
+                        {
+                            MapCell a = neighbours[neighbour.Key[0].ToString()];
+                            MapCell b = neighbours[neighbour.Key[1].ToString()];
+                            if (a.HeightTiles.Count > 0 && b.HeightTiles.Count > 0)
+                                canWalkthrough = false;
+                        }
+                        catch { };
+                    }
+                    if (neighbour.Value.Walkable && canWalkthrough &&
+                        Math.Abs(GetCellHeight(currentCell.Cell) - GetCellHeight(neighbour.Value)) < 16)
                     { 
                         if (closedList.Any(x => x.Cell == neighbour.Value))
                             continue;

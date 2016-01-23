@@ -323,11 +323,6 @@ namespace Pathfinder
                 if (ks.IsKeyDown(Keys.NumPad3)) MoveDir = new Vector2(2, 1);
             }
 
-            if (Math.Abs(map.GetOverallHeight(Position) - map.GetOverallHeight(Position + MoveDir)) > 16)
-            {
-                MoveDir = Vector2.Zero;
-            }
-
             MoveBy((int)MoveDir.X, (int)MoveDir.Y);
             SetMoveAnimation();
 
