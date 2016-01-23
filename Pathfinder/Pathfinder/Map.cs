@@ -301,7 +301,7 @@ namespace Pathfinder
         {
             return (int)Math.Sqrt(Math.Pow(cell.X - target.X, 2) + Math.Pow(cell.Y - target.Y, 2));
         }
-        public List<MapCell> getPath(Point start, Point target)
+        public List<Point> getPath(Point start, Point target)
         {
             List<Node> closedList = new List<Node>();
             List<Node> openList = new List<Node>();
@@ -345,15 +345,12 @@ namespace Pathfinder
 
             } while (openList.Count > 0);
             var node = closedList.Where(x => x.Cell == targetCell).FirstOrDefault();
-            List<MapCell> path = new List<MapCell>();
-            if (node != null)
+            List<Point> path = new List<Point>();
+            while (node != null)
             {
-                do
-                {
-                    path.Add(node.Cell);
-                    node = node.Parent;
-                } while (node.Parent != null);
-            }
+                path.Add(new Point(node.Cell.X,node.Cell.Y));
+                node = node.Parent;
+            };
             path.Reverse();
             return path;
 

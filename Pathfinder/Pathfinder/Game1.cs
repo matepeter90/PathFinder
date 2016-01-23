@@ -92,7 +92,7 @@ namespace Pathfinder
             vlad.AddAnimation("IdleSouthWest", 0, 48 * 6, 48, 48, 1, 0.2f);
             vlad.AddAnimation("IdleWest", 0, 48 * 7, 48, 48, 1, 0.2f);
 
-            vlad.Position = new Vector2(100, 100);
+            vlad.Position = new Vector2(200, 200);
             vlad.DrawOffset = new Vector2(-24, -38);
             vlad.CurrentAnimation = "WalkEast";
             vlad.IsAnimating = true;
@@ -124,8 +124,13 @@ namespace Pathfinder
 
             if (ms.LeftButton == ButtonState.Pressed && oldms.LeftButton == ButtonState.Released)
             {
-                Vector2 mouseLoc = Camera.ScreenToWorld(new Vector2(Mouse.GetState().X, Mouse.GetState().Y));
-                vlad.SetTarget(map, new Point((int)mouseLoc.X, (int)mouseLoc.Y));
+                Vector2 mouseLoc = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
+                if (mouseLoc.X > 0 && mouseLoc.X < GraphicsDevice.Viewport.Width &&
+                    mouseLoc.Y > 0 && mouseLoc.Y < GraphicsDevice.Viewport.Height)
+                {
+                    Vector2 mouseWorldLoc = Camera.ScreenToWorld(mouseLoc);
+                    vlad.SetTarget(map, new Point((int)mouseWorldLoc.X, (int)mouseWorldLoc.Y));
+                }
             }
 
             vlad.Move(map, manualControl, ks);
@@ -217,6 +222,8 @@ namespace Pathfinder
                     if (debugMode)
                     {
                         Color debugColor = new Color(255, 255 - heightRow * 50, 255 - heightRow * 50);
+                        if (vlad.path.Contains(new Point(mapx, mapy)))
+                            debugColor = Color.Blue;
                         spriteBatch.Draw(
                             border,
                             Camera.WorldToScreen(

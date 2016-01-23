@@ -15,7 +15,7 @@ namespace Pathfinder
         public Point Target { get; set; }
         public Vector2 DrawOffset { get; set; }
         public float DrawDepth { get; set; }
-        public List<MapCell> path;
+        public List<Point> path;
 
         // The texture that holds the images for this sprite
         Texture2D t2dTexture;
@@ -213,7 +213,7 @@ namespace Pathfinder
             Target = new Point(-1, -1);
             MoveDir = Vector2.Zero;
             Animation = "";
-            path = new List<MapCell>();
+            path = new List<Point>();
         }
 
         void UpdateRotation()
@@ -256,8 +256,24 @@ namespace Pathfinder
         public void SetTarget(Map map, Point target)
         {
             path = map.getPath(new Point((int)Position.X, (int)Position.Y), target);
-            Target = new Point(path[0].X * Tile.StepX, path[0].Y * Tile.StepY);
-            path.RemoveAt(0);
+            moveToNextTarget();
+        }
+
+        public void moveToNextTarget()
+        {
+            if (path.Count > 0)
+            {
+                Vector2 firstSquare = new Vector2(Camera.Location.X / Tile.StepX, Camera.Location.Y / Tile.StepY);
+                int firstX = (int)firstSquare.X;
+                int firstY = (int)firstSquare.Y;
+                int mapx = (firstX + path[0].X);
+                int mapy = (firstY + path[0].Y);
+                int rowOffset = 0;
+                if (mapy % 2 == 1)
+                    rowOffset = Tile.OddRowXOffset;
+                Target = new Point(mapx * Tile.StepX + rowOffset + 28, mapy * Tile.StepY + 48);
+                path.RemoveAt(0);
+            }
         }
 
         public void MoveBy(int x, int y)
@@ -289,14 +305,9 @@ namespace Pathfinder
                 if (Position.X == Target.X && Position.Y == Target.Y)
                 {
                     if (path.Count > 0)
-                    {
-                        Target = new Point(path[0].X * Tile.StepX, path[0].Y * Tile.StepY);
-                        path.RemoveAt(0);
-                    }
+                        moveToNextTarget();
                     else
-                    {
                         Target = new Point(-1, -1);
-                    }
                 }
                 
             }
