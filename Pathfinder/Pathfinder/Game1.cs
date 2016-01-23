@@ -200,7 +200,11 @@ namespace Pathfinder
                     }
 
                     int heightRow = 0;
-
+                    Color heightColor = Color.White;
+                    if (debugMode)
+                    {
+                        heightColor = new Color(Color.Black, 0.7f);
+                    }
                     foreach (int tileID in map.Rows[mapy].Columns[mapx].HeightTiles)
                     {
                         spriteBatch.Draw(
@@ -210,7 +214,7 @@ namespace Pathfinder
                                     mapx * Tile.StepX + rowOffset,
                                     mapy * Tile.StepY - (heightRow * Tile.HeightOffset))),
                             tile.GetSourceRectangle(tileID),
-                            Color.White,
+                            heightColor,
                             0.0f,
                             Vector2.Zero,
                             1.0f,
@@ -277,7 +281,7 @@ namespace Pathfinder
             Point highlightWorldLoc = new Point((int)highlightLoc.X, (int)highlightLoc.Y);
             Point hilightOriginPoint = map.WorldToMapCell(highlightWorldLoc);
 
-            vlad.Draw(spriteBatch, 0, (-1) * map.GetOverallHeight(vlad.Position));
+            vlad.Draw(spriteBatch, 0, 0);
 
             int hilightrowOffset = 0;
             if ((hilightOriginPoint.Y) % 2 == 1)
@@ -285,12 +289,12 @@ namespace Pathfinder
 
             if (debugMode)
             {
-                float debugHUDOriginX = GraphicsDevice.Viewport.Width - 110;
+                float debugHUDOriginX = GraphicsDevice.Viewport.Width - 120;
                 float debugHUDOriginY = 0;
                 spriteBatch.Draw(
                      debugHUD,
                      new Vector2(debugHUDOriginX, debugHUDOriginY),
-                     new Rectangle(0, 0, 110, GraphicsDevice.Viewport.Height),
+                     new Rectangle(0, 0, 120, GraphicsDevice.Viewport.Height),
                      Color.LightGray,
                      0.0f,
                      Vector2.Zero,
