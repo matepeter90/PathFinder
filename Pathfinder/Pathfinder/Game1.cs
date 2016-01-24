@@ -13,7 +13,6 @@ namespace Pathfinder
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         bool debugMode = false;
-        bool manualControl = false;
         SpriteFont Arial6;
         SpriteFont Arial12;
         Map map;
@@ -62,8 +61,7 @@ namespace Pathfinder
             tile.TileSetTexture = Content.Load<Texture2D>("Textures/Tilesets/tileset");
             Arial6 = Content.Load<SpriteFont>("Fonts/Arial6");
             Arial12 = Content.Load<SpriteFont>("Fonts/Arial12");
-            map = new Map(Content.Load<Texture2D>("Textures/Tilesets/mousemap"),
-                          Content.Load<Texture2D>(@"Textures\TileSets\slopemap"));
+            map = new Map(Content.Load<Texture2D>("Textures/Tilesets/mousemap"));
             Camera.WorldWidth = ((map.MapWidth - 2) * Tile.StepX);
             Camera.WorldHeight = ((map.MapHeight - 2) * Tile.StepY);
             highlight = Content.Load<Texture2D>("Textures/Tilesets/highlight");
@@ -92,7 +90,7 @@ namespace Pathfinder
             vlad.AddAnimation("IdleSouthWest", 0, 48 * 6, 48, 48, 1, 0.2f);
             vlad.AddAnimation("IdleWest", 0, 48 * 7, 48, 48, 1, 0.2f);
 
-            vlad.Position = new Vector2(200, 200);
+            vlad.Position = new Vector2(180, 160);
             vlad.DrawOffset = new Vector2(-24, -38);
             vlad.CurrentAnimation = "WalkEast";
             vlad.IsAnimating = true;
@@ -114,11 +112,6 @@ namespace Pathfinder
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
-
-            
             KeyboardState ks = Keyboard.GetState();
             MouseState ms = Mouse.GetState();
 
@@ -133,17 +126,13 @@ namespace Pathfinder
                 }
             }
 
-            vlad.Move(map, manualControl, ks);
+            vlad.Move(map, ks);
 
             if (ks.IsKeyDown(Keys.C) && oldks.IsKeyUp(Keys.C))
             {
                 debugMode = !debugMode;
             }
 
-            if (ks.IsKeyDown(Keys.X) && oldks.IsKeyUp(Keys.X))
-            {
-                manualControl = !manualControl;
-            }
             oldks = ks;
             oldms = ms;
 
@@ -263,7 +252,7 @@ namespace Pathfinder
                             Camera.WorldToScreen(
                                 new Vector2((mapx * Tile.StepX) + rowOffset, mapy * Tile.StepY)),
                             tile.GetSourceRectangle(tileID),
-                            Color.White,
+                            heightColor,
                             0.0f,
                             Vector2.Zero,
                             1.0f,

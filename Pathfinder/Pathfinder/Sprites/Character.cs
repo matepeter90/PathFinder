@@ -284,45 +284,28 @@ namespace Pathfinder
             UpdateRotation();
         }
 
-        public void Move(Map map, bool manualControl, KeyboardState ks)
+        public void Move(Map map, KeyboardState ks)
         {
             MoveDir = Vector2.Zero;
-            if (!manualControl)
+            if (Target.X >= 0 && Target.Y >= 0)
             {
-                if (Target.X >= 0 && Target.Y >= 0)
-                {
-                    if ((int)Position.X < (int)Target.X)
-                        MoveDir += new Vector2(1, 0);
-                    if ((int)Position.X > (int)Target.X)
-                        MoveDir += new Vector2(-1, 0);
-                    if ((int)Position.Y < (int)Target.Y)
-                        MoveDir += new Vector2(0, 1);
-                    if ((int)Position.Y > (int)Target.Y)
-                        MoveDir += new Vector2(0, -1);
-                    
-                }
-
-                if (Position.X == Target.X && Position.Y == Target.Y)
-                {
-                    if (path.Count > 0)
-                        moveToNextTarget();
-                    else
-                        Target = new Point(-1, -1);
-                }
-                
-            }
-            else
-            {
-                if (ks.IsKeyDown(Keys.NumPad7)) MoveDir = new Vector2(-2, -1);
-                if (ks.IsKeyDown(Keys.NumPad8)) MoveDir = new Vector2(0, -1);
-                if (ks.IsKeyDown(Keys.NumPad9)) MoveDir = new Vector2(2, -1);
-                if (ks.IsKeyDown(Keys.NumPad4)) MoveDir = new Vector2(-2, 0);
-                if (ks.IsKeyDown(Keys.NumPad6)) MoveDir = new Vector2(2, 0);
-                if (ks.IsKeyDown(Keys.NumPad1)) MoveDir = new Vector2(-2, 1);
-                if (ks.IsKeyDown(Keys.NumPad2)) MoveDir = new Vector2(0, 1);
-                if (ks.IsKeyDown(Keys.NumPad3)) MoveDir = new Vector2(2, 1);
+                if ((int)Position.X < (int)Target.X)
+                    MoveDir += new Vector2(1, 0);
+                if ((int)Position.X > (int)Target.X)
+                    MoveDir += new Vector2(-1, 0);
+                if ((int)Position.Y < (int)Target.Y)
+                    MoveDir += new Vector2(0, 1);
+                if ((int)Position.Y > (int)Target.Y)
+                    MoveDir += new Vector2(0, -1);
             }
 
+            if (Position.X == Target.X && Position.Y == Target.Y)
+            {
+                if (path.Count > 0)
+                    moveToNextTarget();
+                else
+                    Target = new Point(-1, -1);
+            }
             MoveBy((int)MoveDir.X, (int)MoveDir.Y);
             SetMoveAnimation();
 
